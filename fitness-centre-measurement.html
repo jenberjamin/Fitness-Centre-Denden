@@ -326,38 +326,80 @@
     </div>
 
     <script>
-        // --- CONFIG ---
-        const CHART_LIMIT = 7; // Keep chart clean (Last 7 entries)
+        // --- 1. SYSTEM CONFIGURATION & SAFETY NET ---
+        const CHART_LIMIT = 7; 
         const bodyParts = [
             "Weight", "Shoulders", "Chest", "Left Bicep", "Right Bicep", 
             "Left Forearm", "Right Forearm", "Upper Abs", "Waist", "Lower Abs", 
             "Hips", "Left Thigh", "Right Thigh", "Left Calf", "Right Calf"
         ];
 
-        // --- DB STRUCTURE (Matches Core.js format) ---
-        // historyLogs handled by core.js (simulated if missing for UI check)
-        if (typeof historyLogs === 'undefined') {
-             console.warn("Core.js not found. Initializing empty structure.");
-             window.historyLogs = [{ date: "Init", data: {} }]; 
-             window.goals = {};
+        // SAFETY NET 1: HISTORY LOGS (CORRECTED KEY)
+        if (typeof historyLogs === 'undefined' || !Array.isArray(historyLogs)) {
+             console.warn("Core.js connection unstable. Switching to Local Mode (Logs).");
+             // CHANGE: Key matches core.js now
+             const savedLogs = localStorage.getItem('LifeHub_Measurements'); 
+             window.historyLogs = savedLogs ? JSON.parse(savedLogs) : [{ date: "Init", data: {} }]; 
         }
 
-        // Goals
+        // SAFETY NET 2: GOALS (CORRECTED KEY)
+        if (typeof goals === 'undefined') {
+             console.warn("Goals not detected. Switching to Local Mode (Goals).");
+             // CHANGE: Key matches core.js now
+             const savedGoals = localStorage.getItem('LifeHub_Goals');
+             window.goals = savedGoals ? JSON.parse(savedGoals) : {};
+        }
+
         let activeCategory = 'Weight'; 
         let myChart;
 
-        // --- INIT ---
+        // --- 2. HELPER FUNCTIONS ---
+        function getCurrentLog() { 
+            if(!historyLogs || historyLogs.length === 0) return { date: "Init", data: {} };
+            return historyLogs[historyLogs.length - 1]; 
+        }
+        
+        function getPreviousLog() { 
+            if(!historyLogs || historyLogs.length <= 1) return getCurrentLog();
+            return historyLogs[historyLogs.length - 2]; 
+        }
+
+        function getTimeAgo(dateString) {
+            if (!dateString || dateString === "Init") return "SYSTEM STATUS: READY";
+            const date = new Date(dateString);
+            const now = new Date();
+            if (isNaN(date.getTime())) return "SYSTEM STATUS: STANDBY";
+
+            const seconds = Math.round((now - date) / 1000);
+            const minutes = Math.round(seconds / 60);
+            const hours = Math.round(minutes / 60);
+            const days = Math.round(hours / 24);
+
+            if (seconds < 60) return `UPDATED: JUST NOW`;
+            else if (minutes < 60) return `UPDATED: ${minutes} MIN AGO`;
+            else if (hours < 24) return `UPDATED: ${hours} HR AGO`;
+            else return `UPDATED: ${days} DAY${days > 1 ? 'S' : ''} AGO`;
+        }
+
+        // CHANGE: Key matches core.js now
+        function saveSystemData() {
+            localStorage.setItem('LifeHub_Measurements', JSON.stringify(historyLogs));
+            localStorage.setItem('LifeHub_Goals', JSON.stringify(goals));
+            console.log("System Data Saved Locally (Synced Keys).");
+        }
+
+        // --- 3. INITIALIZATION ---
         window.onload = function() {
-            initChart();
-            renderGrid();
-            updateHeaderStats();
+            try {
+                initChart();
+                renderGrid();
+                updateHeaderStats();
+            } catch (error) {
+                console.error("Initialization Error:", error);
+            }
         };
 
-        // --- HELPERS ---
-        function getCurrentLog() { return historyLogs[historyLogs.length - 1]; }
-        function getPreviousLog() { return historyLogs.length > 1 ? historyLogs[historyLogs.length - 2] : getCurrentLog(); }
-        
-        // --- RENDER GRID ---
+        // --- 4. CORE FUNCTIONS (No Changes Needed Here) ---
         function renderGrid() {
             const container = document.getElementById('mGrid');
             container.innerHTML = '';
@@ -371,12 +413,10 @@
                 const prevVal = previous[part] || 0;
                 const goal = goals[part];
                 
-                // Arrow Logic
                 let arrowHtml = '<span class="material-symbols-outlined arrow-icon neutral">horizontal_rule</span>';
                 if (goal && val > 0) {
                     const distCurrent = Math.abs(goal - val);
                     const distPrev = Math.abs(goal - prevVal);
-                    
                     if (distCurrent < distPrev) arrowHtml = '<span class="material-symbols-outlined arrow-icon up-good">arrow_upward</span>';
                     else if (distCurrent > distPrev) arrowHtml = '<span class="material-symbols-outlined arrow-icon down-bad">arrow_downward</span>';
                 }
@@ -393,10 +433,8 @@
             });
         }
 
-        // --- CHART (UPDATED COLORS FOR NEW THEME) ---
         function initChart() {
             const ctx = document.getElementById('mainChart').getContext('2d');
-            // Updated Gradient to Cyan
             const gradient = ctx.createLinearGradient(0, 0, 0, 400);
             gradient.addColorStop(0, 'rgba(0, 229, 255, 0.2)'); 
             gradient.addColorStop(1, 'rgba(0, 229, 255, 0.0)');
@@ -409,7 +447,7 @@
                         {
                             label: 'Progress',
                             data: [],
-                            borderColor: '#00e5ff', // SYSTEM CYAN
+                            borderColor: '#00e5ff',
                             borderWidth: 2,
                             backgroundColor: gradient,
                             fill: true,
@@ -420,7 +458,7 @@
                         {
                             label: 'Goal',
                             data: [], 
-                            borderColor: '#FFD700', // SYSTEM GOLD
+                            borderColor: '#FFD700',
                             borderWidth: 1,
                             borderDash: [5, 5], 
                             pointRadius: 0
@@ -439,7 +477,7 @@
                     }
                 }
             });
-            switchChart('Weight'); // Load initial data
+            switchChart('Weight'); 
         }
 
         function switchChart(part) {
@@ -448,9 +486,8 @@
             const g = goals[part];
             document.getElementById('chartGoalLabel').innerText = g ? `GOAL: ${g}` : "GOAL: --";
 
-            // Slice Data for Limit (Last N entries)
             const slicedLogs = historyLogs.slice(-CHART_LIMIT);
-            const labels = slicedLogs.map(log => log.date);
+            const labels = slicedLogs.map(log => log.date.includes("Init") ? "Start" : log.date.split('T')[0]); 
             const data = slicedLogs.map(log => log.data[part] || 0);
 
             myChart.data.labels = labels;
@@ -458,26 +495,21 @@
             myChart.data.datasets[1].data = Array(labels.length).fill(g || null);
             myChart.update();
 
-            renderGrid(); // Updates highlights
+            renderGrid(); 
             updateHeaderStats();
         }
 
-function updateHeaderStats() {
-    const currentLog = getCurrentLog();
-    // Default to 0 if weight isn't found
-    const w = currentLog.data["Weight"] || 0;
-    
-    document.getElementById('weightDisplay').innerText = w;
-    
-    // Calculate BMI
-    const bmi = w > 0 ? (w / ((1.6) ** 2)).toFixed(1) : 0;
-    document.getElementById('bmiDisplay').innerText = bmi;
+        function updateHeaderStats() {
+            const currentLog = getCurrentLog();
+            const w = currentLog.data["Weight"] || 0;
+            
+            document.getElementById('weightDisplay').innerText = w;
+            const bmi = w > 0 ? (w / ((1.6) ** 2)).toFixed(1) : 0;
+            document.getElementById('bmiDisplay').innerText = bmi;
+            document.getElementById('lastUpdateTxt').innerText = getTimeAgo(currentLog.date);
+        }
 
-    // NEW LINE: This runs the time calculator we just added
-    document.getElementById('lastUpdateTxt').innerText = getTimeAgo(currentLog.date);
-}
-
-        // --- DYNAMIC MODALS ---
+        // --- 5. INTERACTION & SAVING ---
         function openDynamicModal(type) {
             const modal = document.getElementById('dynamicModal');
             const title = document.getElementById('modalTitle');
@@ -490,7 +522,7 @@ function updateHeaderStats() {
                 title.innerText = "SET TARGETS";
                 title.style.color = "#FFD700";
                 btn.innerText = "SAVE TARGETS";
-                btn.style.background = "#FFD700"; // Gold Button for Gold Goals
+                btn.style.background = "#FFD700"; 
                 btn.style.color = "#000";
                 btn.onclick = function() { saveBatch('goal'); };
                 
@@ -522,52 +554,52 @@ function updateHeaderStats() {
         }
 
         function saveBatch(type) {
-    if (type === 'record') {
-        // CHANGE: We now save the ISO String for accurate timing
-        const newEntry = { date: new Date().toISOString(), data: { ...getCurrentLog().data } }; 
-        let hasUpdate = false;
+            if (type === 'record') {
+                const currentData = getCurrentLog().data;
+                const newEntry = { 
+                    date: new Date().toISOString(), 
+                    data: { ...currentData } 
+                }; 
+                
+                let hasUpdate = false;
+                bodyParts.forEach(part => {
+                    const input = document.getElementById(`input_${part}`);
+                    if (input && input.value) {
+                        newEntry.data[part] = parseFloat(input.value);
+                        hasUpdate = true;
+                    }
+                });
 
-        bodyParts.forEach(part => {
-            const val = document.getElementById(`input_${part}`).value;
-            if (val) {
-                newEntry.data[part] = parseFloat(val);
-                hasUpdate = true;
+                if(hasUpdate) {
+                    historyLogs.push(newEntry);
+                    saveSystemData();
+                    updateHeaderStats();
+                    switchChart(activeCategory);
+                }
+            } else {
+                bodyParts.forEach(part => {
+                    const input = document.getElementById(`input_${part}`);
+                    if (input && input.value) {
+                        goals[part] = parseFloat(input.value);
+                    }
+                });
+                saveSystemData();
+                switchChart(activeCategory);
             }
-        });
-
-        if(hasUpdate) {
-            historyLogs.push(newEntry);
-            saveSystemData();
-            updateHeaderStats(); // Force the label to update immediately
+            closeModal('dynamicModal');
         }
-    } else {
-        bodyParts.forEach(part => {
-            const val = document.getElementById(`input_${part}`).value;
-            if (val) goals[part] = parseFloat(val);
-        });
-        saveSystemData();
-    }
-    closeModal('dynamicModal');
-    switchChart(activeCategory);
-}
 
-        // --- COMPARE MODAL ---
         function openCompareModal() {
-            // Populate Dropdown with Dates (excluding current)
             const select = document.getElementById('compareDateSelect');
             select.innerHTML = '';
-            
-            // Add all past dates
             historyLogs.slice(0, -1).forEach((log, index) => {
+                const label = log.date.includes("Init") ? "Start" : log.date.split('T')[0];
                 const option = document.createElement('option');
                 option.value = index;
-                option.text = log.date;
+                option.text = label;
                 select.appendChild(option);
             });
-            
-            // Select the most recent past log by default
-            select.selectedIndex = select.options.length - 1;
-            
+            if(select.options.length > 0) select.selectedIndex = select.options.length - 1;
             renderHistory();
             document.getElementById('historyModal').classList.add('open');
         }
@@ -601,28 +633,6 @@ function updateHeaderStats() {
         }
 
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-// --- NEW TOOL: TIME CALCULATOR ---
-function getTimeAgo(dateString) {
-    if (!dateString || dateString === "Init") return "SYSTEM STATUS: READY";
-    
-    const date = new Date(dateString);
-    const now = new Date();
-    
-    // Check if date is valid
-    if (isNaN(date.getTime())) return "SYSTEM STATUS: STANDBY";
-
-    const seconds = Math.round((now - date) / 1000);
-    const minutes = Math.round(seconds / 60);
-    const hours = Math.round(minutes / 60);
-    const days = Math.round(hours / 24);
-
-    if (seconds < 60) return `UPDATED: JUST NOW`;
-    else if (minutes < 60) return `UPDATED: ${minutes} MIN AGO`;
-    else if (hours < 24) return `UPDATED: ${hours} HR AGO`;
-    else return `UPDATED: ${days} DAY${days > 1 ? 'S' : ''} AGO`;
-}
-
     </script>
 </body>
 </html>
