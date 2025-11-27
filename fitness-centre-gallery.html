@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Centre | Fitness Gallery</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+
+    <style>
+        /* --- SYSTEM VARIABLES (MATCHING LOBBY) --- */
+        :root {
+            --font-header: 'Oswald', sans-serif;
+            --font-body: 'Red Hat Display', sans-serif;
+            
+            --color-accent: #00e5ff; /* The "System" Blue */
+            --color-accent-dim: rgba(0, 229, 255, 0.15);
+            
+            --color-white: #ffffff;
+            --color-white-muted: rgba(255, 255, 255, 0.6);
+            
+            --color-green: #00ff9d; /* Neon Green for Gains */
+            --color-red: #ff3d3d;   /* Neon Red for Alerts */
+            
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            --glass-blur: blur(15px);
+            
+            /* Using the Lobby Background for consistency */
+            --bg-image: url('https://i.imgur.com/xkHee4y.jpeg'); 
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            height: 100vh; width: 100vw; overflow: hidden;
+            background-image: var(--bg-image); 
+            background-size: cover; 
+            background-position: center;
+            font-family: var(--font-body); 
+            color: var(--color-white);
+            background-color: #1a1a1a;
+        }
+
+        /* Dark Overlay to make text pop */
+        body::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 12, 14, 0.75); 
+            backdrop-filter: blur(3px);
+            z-index: -1;
+        }
+
+        .gallery-container { 
+            width: 100%; 
+            max-width: 1400px; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 40px 60px;
+            margin: 0 auto;
+        }
+
+        /* --- HEADER (HUD STYLE) --- */
+        .header-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding-bottom: 20px; 
+            border-bottom: var(--glass-border); 
+            margin-bottom: 30px; 
+        }
+        
+        .title-group { display: flex; align-items: center; gap: 20px; }
+        
+        .back-btn { 
+            font-size: 28px !important; cursor: pointer; opacity: 0.7; transition: 0.3s; 
+        }
+        .back-btn:hover { opacity: 1; color: var(--color-accent); transform: translateX(-5px); }
+        
+        h1 { 
+            font-family: var(--font-header); 
+            font-size: 48px; 
+            letter-spacing: 5px; 
+            text-transform: uppercase; 
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.9);
+        }
+
+        /* --- FILTERS --- */
+        .filter-bar { display: flex; gap: 15px; align-items: center; }
+        
+        .filter-input {
+            background: var(--glass-bg); 
+            border: var(--glass-border); 
+            color: var(--color-white); 
+            padding: 10px 20px; 
+            font-family: var(--font-body); 
+            font-size: 12px; 
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            outline: none; 
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .filter-input:hover, .filter-input:focus { 
+            border-color: var(--color-accent); 
+            background: var(--color-accent-dim);
+        }
+        
+
+	/* Fix for unreadable dropdown text */
+	.filter-input option {
+   	 background-color: #000000; 
+    	color: #ffffff;
+	}
+
+
+
+        /* Date Picker Invert */
+        ::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; opacity: 0.6; }
+
+        /* --- GRID --- */
+        .photo-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 25px; 
+            padding-right: 10px; 
+            overflow-y: auto; 
+            flex: 1; 
+        }
+        /* Scrollbar Styling */
+        .photo-grid::-webkit-scrollbar { width: 4px; }
+        .photo-grid::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+        .photo-grid::-webkit-scrollbar-thumb { background: var(--color-accent); border-radius: 2px; }
+
+        .photo-card {
+            position: relative; 
+            aspect-ratio: 3/4; 
+            background: rgba(0,0,0,0.2); 
+            border: var(--glass-border);
+            overflow: hidden; 
+            cursor: pointer; 
+            transition: all 0.4s ease;
+        }
+        .photo-card:hover { 
+            transform: translateY(-5px); 
+            border-color: var(--color-accent); 
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
+        }
+        
+        .photo-img { 
+            width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: 0.5s; 
+            filter: grayscale(30%); /* Slight desaturation for the vibe */
+        }
+        .photo-card:hover .photo-img { opacity: 1; transform: scale(1.05); filter: grayscale(0%); }
+        
+        .card-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+            display: flex; flex-direction: column; gap: 5px;
+        }
+        
+        .card-date { 
+            font-family: var(--font-header); 
+            font-size: 14px; 
+            color: var(--color-accent); 
+            letter-spacing: 2px; 
+            text-transform: uppercase; 
+        }
+        .card-stats { font-size: 12px; color: var(--color-white); font-weight: 400; letter-spacing: 1px; }
+
+        /* --- FOOTER --- */
+        .footer-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-top: 20px; 
+            padding-top: 20px; 
+            border-top: var(--glass-border); 
+        }
+        
+        .toggle-btn {
+            background: var(--glass-bg); 
+            border: var(--glass-border); 
+            padding: 12px 30px;
+            font-family: var(--font-body); 
+            font-size: 12px; 
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--color-white); 
+            cursor: pointer; 
+            transition: 0.3s; 
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 500;
+        }
+        .toggle-btn:hover { background: var(--color-accent); color: #000; border-color: var(--color-accent); box-shadow: 0 0 15px var(--color-accent-dim); }
+        
+        .add-fab {
+            width: 50px; height: 50px; 
+            border: 1px solid var(--color-accent);
+            background: rgba(0, 229, 255, 0.05);
+            color: var(--color-accent); 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; transition: 0.3s;
+        }
+        .add-fab:hover { background: var(--color-accent); color: #000; box-shadow: 0 0 20px var(--color-accent-dim); }
+
+        /* --- OVERLAYS (GLASS HUD) --- */
+        .overlay-fs {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); 
+            backdrop-filter: blur(10px);
+            z-index: 100; 
+            display: none; 
+            flex-direction: column; 
+            padding: 60px;
+            animation: fadeIn 0.3s ease;
+        }
+        .overlay-fs.active { display: flex; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- NEW POST STYLES --- */
+        .np-header { 
+            font-family: var(--font-header); 
+            font-size: 40px; 
+            color: var(--color-white); 
+            margin-bottom: 40px; 
+            display: flex; align-items: center; gap: 20px; 
+            letter-spacing: 5px;
+        }
+        
+        .np-container { display: flex; gap: 60px; height: 100%; }
+        .np-left, .np-right { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+        
+        .input-label { 
+            font-size: 10px; 
+            color: var(--color-accent); 
+            letter-spacing: 2px; 
+            text-transform: uppercase;
+            margin-bottom: 8px; 
+            font-weight: 700;
+        }
+        
+        .np-input, .np-textarea { 
+            width: 100%; 
+            background: rgba(255,255,255,0.03); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            color: #fff; 
+            padding: 15px; 
+            font-family: var(--font-body); 
+            font-size: 14px;
+            outline: none; 
+            transition: 0.3s;
+        }
+        .np-input:focus, .np-textarea:focus { border-color: var(--color-accent); background: rgba(0, 229, 255, 0.05); }
+        
+        .np-textarea { resize: none; height: 150px; }
+
+        .action-row { display: flex; gap: 20px; margin-top: auto; }
+        
+        .btn-action { 
+            padding: 15px 30px; 
+            font-family: var(--font-body); 
+            font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+            font-weight: 700; cursor: pointer; border: 1px solid transparent; transition: 0.3s; 
+        }
+        .btn-save { background: var(--color-accent); color: #000; }
+        .btn-save:hover { box-shadow: 0 0 20px var(--color-accent-dim); }
+        
+        .btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; }
+        .btn-cancel:hover { border-color: var(--color-red); color: var(--color-red); }
+
+        /* --- VIEW POST STYLES --- */
+        .vp-container { 
+            width: 100%; height: 100%; 
+            border: var(--glass-border); 
+            background: rgba(0,0,0,0.6); 
+            display: flex; overflow: hidden; 
+        }
+        
+        .vp-image-area { 
+            flex: 2; position: relative; 
+            background: rgba(0,0,0,0.5); 
+            display: flex; align-items: center; justify-content: center; 
+            border-right: var(--glass-border);
+        }
+        .vp-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        .slider-nav { 
+            position: absolute; top: 50%; transform: translateY(-50%); 
+            color: var(--color-white); opacity: 0.5; 
+            font-size: 48px !important; cursor: pointer; z-index: 10; transition: 0.3s;
+        }
+        .slider-nav:hover { opacity: 1; color: var(--color-accent); }
+        .nav-prev { left: 30px; } .nav-next { right: 30px; }
+        
+        .vp-cat-label {
+            position: absolute; top: 30px; left: 30px;
+            font-family: var(--font-header); font-size: 80px; 
+            color: rgba(255,255,255,0.05); pointer-events: none;
+        }
+
+        .vp-details-area { 
+            width: 450px; 
+            padding: 50px; 
+            display: flex; flex-direction: column; 
+            background: rgba(20,20,20,0.8);
+        }
+        
+        .vp-meta-row { 
+            display: flex; justify-content: space-between; 
+            color: var(--color-white-muted); 
+            font-size: 12px; margin-bottom: 15px; 
+            font-family: var(--font-body); letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 5px;
+        }
+        
+        .vp-diary { 
+            background: transparent; 
+            padding-top: 20px; 
+            color: #ddd; font-size: 14px; line-height: 1.8; 
+            flex: 1; overflow-y: auto; margin-top: 20px; 
+            font-weight: 300;
+        }
+        
+        .vp-actions { display: flex; gap: 20px; margin-bottom: 40px; justify-content: flex-end; }
+        .vp-icon { font-size: 20px !important; color: var(--color-white-muted); cursor: pointer; transition: 0.3s; }
+        .vp-icon:hover { color: var(--color-accent); }
+        .vp-icon.delete:hover { color: var(--color-red); }
+
+        /* --- COMPARISON LAYOUT --- */
+        .comp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        
+        .comp-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 120px 1fr; /* Controls are narrower */
+            gap: 30px; 
+            height: 85%; 
+        }
+        
+        .comp-panel {
+            background: rgba(0,0,0,0.3); 
+            border: var(--glass-border); 
+            padding: 20px; 
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        .comp-panel.active { border-color: var(--color-accent); box-shadow: 0 0 20px var(--color-accent-dim); }
+
+        .comp-img-box {
+            flex: 1; background: rgba(0,0,0,0.5); overflow: hidden;
+            display: flex; align-items: center; justify-content: center; position: relative;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .comp-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .no-image-txt { color: rgba(255,255,255,0.1); font-family: var(--font-header); letter-spacing: 5px; }
+
+        .comp-stats-overlay {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(0,0,0,0.8); padding: 8px 15px; 
+            font-family: var(--font-body); font-size: 12px; font-weight: 500; color: var(--color-accent);
+            backdrop-filter: blur(4px); border: 1px solid rgba(0, 229, 255, 0.3);
+        }
+
+        .comp-controls {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px;
+        }
+
+        .diff-label { font-size: 10px; color: var(--color-white-muted); letter-spacing: 2px; text-transform: uppercase; }
+        .diff-val { font-family: var(--font-header); font-size: 32px; margin-bottom: 30px; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .diff-green { color: var(--color-green); text-shadow: 0 0 15px rgba(0, 255, 157, 0.4); }
+        .diff-red { color: var(--color-red); text-shadow: 0 0 15px rgba(255, 61, 61, 0.4); }
+
+        .comp-btn {
+            width: 100%; padding: 15px 0;
+            background: transparent; border: 1px solid rgba(255,255,255,0.1); 
+            color: var(--color-white-muted); font-family: var(--font-body); font-size: 10px; letter-spacing: 2px;
+            cursor: pointer; transition: 0.2s; text-transform: uppercase;
+        }
+        .comp-btn:hover { border-color: var(--color-accent); color: var(--color-white); }
+        .comp-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: #000; font-weight: 700; box-shadow: 0 0 15px var(--color-accent-dim); }
+
+        /* SAFETY DIALOG */
+        .safety-dialog {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 200; display: none;
+            justify-content: center; align-items: center; backdrop-filter: blur(5px);
+        }
+        .safety-box {
+            background: #1a1a1a; border: 1px solid var(--color-red); 
+            padding: 40px; text-align: center; width: 400px;
+            box-shadow: 0 0 30px rgba(255, 61, 61, 0.2);
+        }
+        .safety-title { color: var(--color-red); font-family: var(--font-header); font-size: 24px; margin-bottom: 10px; letter-spacing: 2px;}
+
+    </style>
+</head>
+<body>
+
+    <div class="gallery-container">
+        <div class="header-row">
+            <div class="title-group">
+                <span class="material-symbols-outlined back-btn" onclick="window.location.href='FITNESS-CENTRE.html'">keyboard_backspace</span>
+                <h1>Fitness Gallery</h1>
+            </div>
+            
+            <div class="filter-bar">
+                <select id="catFilter" class="filter-input" onchange="renderGrid()">
+                    <option value="DEFAULT">Front (Default)</option>
+                    <option value="BACK">Back</option>
+                    <option value="SIDE">Side</option>
+                    <option value="UPPER">Upper</option>
+                    <option value="LOWER">Lower</option>
+                </select>
+                <input type="text" id="tagFilter" class="filter-input" placeholder="SEARCH TAGS..." onkeyup="renderGrid()">
+                <select id="timeFilter" class="filter-input" onchange="renderGrid()">
+    <option value="ALL">All Time</option>
+    <option value="THIS_WEEK">This Week</option>
+    <option value="LAST_WEEK">Last Week</option>
+    <option value="THIS_MONTH">This Month</option>
+    <option value="LAST_MONTH">Last Month</option>
+    <option value="THIS_YEAR">This Year</option>
+    <option value="LAST_YEAR">Last Year</option>
+</select>
+                <input type="date" id="dateFilter" class="filter-input" onchange="renderGrid()">
+            </div>
+        </div>
+
+        <div class="photo-grid" id="photoGrid"></div>
+
+        <div class="footer-bar">
+            <button class="toggle-btn" onclick="openComparison()"><span class="material-symbols-outlined">view_column</span> Compare</button>
+            <div class="add-fab" onclick="openNewPost()"><span class="material-symbols-outlined">add</span></div>
+        </div>
+    </div>
+
+    <div class="overlay-fs" id="newPostOverlay">
+        <div class="np-header">
+            <span class="material-symbols-outlined" style="font-size: 40px; color: var(--color-accent);">add_a_photo</span> 
+            <span id="npTitle">NEW RECORD</span>
+        </div>
+        <div class="np-container">
+            <div class="np-left">
+                <div><div class="input-label">FRONT (Required)</div><input type="text" id="inFront" class="np-input" placeholder="Paste Imgur Link"></div>
+                <div><div class="input-label">BACK</div><input type="text" id="inBack" class="np-input" placeholder="Paste Imgur Link"></div>
+                <div><div class="input-label">SIDE</div><input type="text" id="inSide" class="np-input" placeholder="Paste Imgur Link"></div>
+                <div><div class="input-label">UPPER</div><input type="text" id="inUpper" class="np-input" placeholder="Paste Imgur Link"></div>
+                <div><div class="input-label">LOWER</div><input type="text" id="inLower" class="np-input" placeholder="Paste Imgur Link"></div>
+            </div>
+            <div class="np-right">
+                <div style="display:flex; gap:20px;">
+                    <div style="flex:1"><div class="input-label">Date Captured</div><input type="date" id="inDate" class="np-input"></div>
+                    <div style="flex:1"><div class="input-label">Category (Tag)</div><input type="text" id="inTag" class="np-input" placeholder="e.g. Check-in"></div>
+                </div>
+                <div class="input-label">Log / Diary</div>
+                <textarea id="inDiary" class="np-textarea" placeholder="System Notes..."></textarea>
+                
+                <div class="action-row">
+                    <button class="btn-action btn-cancel" onclick="tryClosePost()">CANCEL</button>
+                    <button class="btn-action btn-save" onclick="savePost()">SAVE RECORD</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay-fs" id="viewPostOverlay">
+        <div class="vp-container">
+            <div class="vp-image-area">
+                <div class="vp-cat-label" id="vpCatLabel">FRONT</div>
+                <span class="material-symbols-outlined slider-nav nav-prev" onclick="slide(-1)">chevron_left</span>
+                <img id="vpImg" src="" class="vp-img">
+                <span class="material-symbols-outlined slider-nav nav-next" onclick="slide(1)">chevron_right</span>
+            </div>
+
+            <div class="vp-details-area">
+                <div class="vp-actions">
+                    <span class="material-symbols-outlined vp-icon" onclick="triggerEdit()" title="Edit Post">edit_square</span>
+                    <span class="material-symbols-outlined vp-icon delete" onclick="deletePost()" title="Delete Post">delete</span>
+                    <span class="material-symbols-outlined vp-icon" onclick="closeViewPost()" style="margin-left: 20px;">close</span>
+                </div>
+                <div style="margin-bottom: 40px;">
+                    <h2 id="vpDateCapTitle" style="font-family: var(--font-header); font-size: 40px; letter-spacing: 2px; color: #fff;">DATE</h2>
+                    <span id="vpTagDisplay" style="color: var(--color-accent); font-family: var(--font-body); letter-spacing: 3px; text-transform: uppercase; font-size: 12px;">TAG</span>
+                </div>
+
+                <div class="vp-meta">
+                    <div class="vp-meta-row"><span>POSTED</span> <span id="vpDatePost"></span></div>
+                    <div class="vp-meta-row"><span>WEIGHT</span> <span id="vpWeight" style="color: var(--color-accent);"></span></div>
+                    <div class="vp-meta-row"><span>BMI</span> <span id="vpBMI"></span></div>
+                </div>
+
+                <div class="vp-diary" id="vpDiaryDisplay"></div>
+                <div class="slider-dots" id="vpDots" style="display:flex; gap:5px; margin-top: 20px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay-fs" id="compOverlay">
+        <div class="comp-header">
+            <div class="title-group">
+                <span class="material-symbols-outlined" style="font-size: 40px; color: var(--color-accent);">compare_arrows</span>
+                <h1>Progress Diagnostics</h1>
+            </div>
+            <span class="material-symbols-outlined" style="font-size: 32px; cursor: pointer; color: rgba(255,255,255,0.5);" onclick="closeComparison()">close</span>
+        </div>
+
+        <div class="comp-grid">
+            <div class="comp-panel">
+                <div class="input-label">BASELINE (THEN)</div>
+                <select id="compDateLeft" class="filter-input" style="width: 100%; margin-bottom: 10px;" onchange="renderCompPanel('left')"></select>
+                
+                <div class="comp-img-box">
+                    <div class="comp-stats-overlay" id="leftOverlayStats">-- • --</div>
+                    <img id="leftImg" class="comp-img" src="" style="display:none;">
+                    <div id="leftNoImg" class="no-image-txt">NO DATA</div>
+                </div>
+            </div>
+
+            <div class="comp-controls">
+                <div class="diff-label">DELTA</div>
+                <div class="diff-val" id="deltaWeight">--</div>
+
+                <button class="comp-btn active" id="btnFront" onclick="setCompCat('FRONT')">FRONT</button>
+                <button class="comp-btn" id="btnBack" onclick="setCompCat('BACK')">BACK</button>
+                <button class="comp-btn" id="btnSide" onclick="setCompCat('SIDE')">SIDE</button>
+                <button class="comp-btn" id="btnUpper" onclick="setCompCat('UPPER')">UPPER</button>
+                <button class="comp-btn" id="btnLower" onclick="setCompCat('LOWER')">LOWER</button>
+            </div>
+
+            <div class="comp-panel active">
+                <div class="input-label">CURRENT (NOW)</div>
+                <select id="compDateRight" class="filter-input" style="width: 100%; margin-bottom: 10px;" onchange="renderCompPanel('right')"></select>
+                
+                <div class="comp-img-box">
+                    <div class="comp-stats-overlay" id="rightOverlayStats">-- • --</div>
+                    <img id="rightImg" class="comp-img" src="" style="display:none;">
+                    <div id="rightNoImg" class="no-image-txt">NO DATA</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="safety-dialog" id="safetyDialog">
+        <div class="safety-box">
+            <div class="safety-title">SYSTEM ALERT</div>
+            <div style="color:#aaa; margin-bottom: 30px; font-size: 13px; line-height: 1.5;">UNSAVED DATA DETECTED.<br>TERMINATING THIS PROCESS WILL RESULT IN DATA LOSS.</div>
+            <div class="action-row" style="justify-content: center; gap: 15px;">
+                <button class="btn-action btn-save" onclick="document.getElementById('safetyDialog').style.display='none'">RESUME</button>
+                <button class="btn-action btn-cancel" onclick="confirmDiscard()">DISCARD</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/core.js"></script>
+
+    <script>
+        let currentPost = null;
+        let editingId = null; 
+        let slideIndex = 0;
+
+        // Comparison State
+        let compLeftPost = null;
+        let compRightPost = null;
+        let activeCompCat = 'FRONT'; // Default view for comparison
+
+        window.onload = function() {
+            // Basic check to ensure core.js is loaded
+            if (typeof galleryPosts === 'undefined') { 
+                console.warn("core.js not loaded or galleryPosts undefined. Using dummy data for UI check.");
+                // Dummy data prevents crash if core.js is missing during testing
+                window.galleryPosts = []; 
+            }
+            renderGrid();
+        };
+
+        // --- GRID RENDER ---
+        function renderGrid() {
+            const grid = document.getElementById('photoGrid');
+            grid.innerHTML = '';
+            
+            const catFilter = document.getElementById('catFilter').value;
+            const tagFilter = document.getElementById('tagFilter').value.toLowerCase();
+            const dateFilter = document.getElementById('dateFilter').value;
+
+            let displayPosts = galleryPosts.sort((a, b) => new Date(b.dateCaptured) - new Date(a.dateCaptured));
+
+            displayPosts.forEach(post => {
+                if(dateFilter && post.dateCaptured !== dateFilter) return;
+                if(tagFilter && !post.tag.toLowerCase().includes(tagFilter)) return;
+                
+                let thumbnail = post.images[0].url; 
+                if(catFilter !== "DEFAULT") {
+                    const specificImg = post.images.find(img => img.cat === catFilter);
+                    if(!specificImg) return; 
+                    thumbnail = specificImg.url;
+                }
+
+                const history = getStatsForDate(post.dateCaptured);
+
+                const card = document.createElement('div');
+                card.className = 'photo-card';
+                card.onclick = () => openViewPost(post.id);
+                card.innerHTML = `
+                    <img src="${thumbnail}" class="photo-img">
+                    <div class="card-overlay">
+                        <div class="card-date">${formatDate(post.dateCaptured)}</div>
+                        <div class="card-stats">${history.Weight} • ${post.tag}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- CRUD: CREATE & EDIT ---
+        function openNewPost() {
+            editingId = null;
+            document.getElementById('npTitle').innerText = "NEW RECORD";
+            document.getElementById('newPostOverlay').classList.add('active');
+            document.getElementById('inDate').valueAsDate = new Date();
+            clearForm();
+        }
+
+        function triggerEdit() {
+            if(!currentPost) return;
+            editingId = currentPost.id;
+            
+            document.getElementById('viewPostOverlay').classList.remove('active');
+            document.getElementById('newPostOverlay').classList.add('active');
+            document.getElementById('npTitle').innerText = "EDIT RECORD";
+
+            document.getElementById('inDate').value = currentPost.dateCaptured;
+            document.getElementById('inTag').value = currentPost.tag;
+            document.getElementById('inDiary').value = currentPost.diary;
+
+            currentPost.images.forEach(img => {
+                if(img.cat === 'FRONT') document.getElementById('inFront').value = img.url;
+                if(img.cat === 'BACK') document.getElementById('inBack').value = img.url;
+                if(img.cat === 'SIDE') document.getElementById('inSide').value = img.url;
+                if(img.cat === 'UPPER') document.getElementById('inUpper').value = img.url;
+                if(img.cat === 'LOWER') document.getElementById('inLower').value = img.url;
+            });
+        }
+
+        function savePost() {
+            const frontUrl = document.getElementById('inFront').value;
+            const capDate = document.getElementById('inDate').value;
+
+            if(!frontUrl) { alert("System Alert: Front photo required for database."); return; }
+            if(!capDate) { alert("System Alert: Date Captured required."); return; }
+
+            let imgs = [{ cat: "FRONT", url: frontUrl }];
+            if(document.getElementById('inBack').value) imgs.push({cat:"BACK", url:document.getElementById('inBack').value});
+            if(document.getElementById('inSide').value) imgs.push({cat:"SIDE", url:document.getElementById('inSide').value});
+            if(document.getElementById('inUpper').value) imgs.push({cat:"UPPER", url:document.getElementById('inUpper').value});
+            if(document.getElementById('inLower').value) imgs.push({cat:"LOWER", url:document.getElementById('inLower').value});
+
+            const postData = {
+                id: editingId ? editingId : Date.now(),
+                dateCaptured: capDate,
+                datePosted: editingId ? currentPost.datePosted : new Date().toISOString().split('T')[0],
+                tag: document.getElementById('inTag').value || "Update",
+                diary: document.getElementById('inDiary').value,
+                images: imgs
+            };
+
+            if (editingId) {
+                const idx = galleryPosts.findIndex(p => p.id === editingId);
+                if(idx !== -1) galleryPosts[idx] = postData;
+            } else {
+                galleryPosts.push(postData);
+            }
+
+            saveSystemData(); 
+            renderGrid();
+            document.getElementById('newPostOverlay').classList.remove('active');
+            clearForm();
+        }
+
+        function deletePost() {
+            if(!currentPost) return;
+            if(confirm("System Warning: Permanently delete this record?")) {
+                galleryPosts = galleryPosts.filter(p => p.id !== currentPost.id);
+                saveSystemData();
+                renderGrid();
+                closeViewPost();
+            }
+        }
+
+        // --- COMPARISON LOGIC (V4.5) ---
+        function openComparison() {
+            const sorted = [...galleryPosts].sort((a, b) => new Date(b.dateCaptured) - new Date(a.dateCaptured));
+            if (sorted.length === 0) { alert("Insufficient data for analysis."); return; }
+
+            document.getElementById('compOverlay').classList.add('active');
+            
+            populateCompDropdowns(sorted);
+
+            document.getElementById('compDateRight').value = sorted[0].id;
+            document.getElementById('compDateLeft').value = sorted.length > 1 ? sorted[1].id : sorted[0].id;
+            
+            // Reset to Front view
+            setCompCat('FRONT');
+        }
+
+        function populateCompDropdowns(sortedPosts) {
+            const leftSel = document.getElementById('compDateLeft');
+            const rightSel = document.getElementById('compDateRight');
+            leftSel.innerHTML = ''; rightSel.innerHTML = '';
+
+            sortedPosts.forEach(post => {
+                const opt = document.createElement('option');
+                opt.value = post.id;
+                opt.text = formatDate(post.dateCaptured);
+                
+                leftSel.appendChild(opt.cloneNode(true));
+                rightSel.appendChild(opt.cloneNode(true));
+            });
+        }
+
+        function setCompCat(cat) {
+            activeCompCat = cat;
+            
+            // Update Button Styles
+            const buttons = document.querySelectorAll('.comp-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById('btn' + cat.charAt(0) + cat.slice(1).toLowerCase());
+            if(activeBtn) activeBtn.classList.add('active');
+
+            renderCompPanel('left');
+            renderCompPanel('right');
+        }
+
+        function renderCompPanel(side) {
+            const id = document.getElementById(side === 'left' ? 'compDateLeft' : 'compDateRight').value;
+            const post = galleryPosts.find(p => p.id == id);
+            
+            if(side === 'left') compLeftPost = post; else compRightPost = post;
+
+            // Stats Overlay
+            const stats = getStatsForDate(post.dateCaptured);
+            document.getElementById(`${side}OverlayStats`).innerText = `${stats.Weight} • BMI ${stats.BMI}`;
+
+            // Image Logic
+            const imgObj = post.images.find(img => img.cat === activeCompCat);
+            const imgEl = document.getElementById(`${side}Img`);
+            const txtEl = document.getElementById(`${side}NoImg`);
+
+            if (imgObj) {
+                imgEl.src = imgObj.url;
+                imgEl.style.display = 'block';
+                txtEl.style.display = 'none';
+            } else {
+                imgEl.style.display = 'none';
+                txtEl.style.display = 'block';
+            }
+            
+            calculateDelta();
+        }
+
+        function calculateDelta() {
+            if(!compLeftPost || !compRightPost) return;
+
+            const w1 = parseFloat(getStatsForDate(compLeftPost.dateCaptured).Weight);
+            const w2 = parseFloat(getStatsForDate(compRightPost.dateCaptured).Weight);
+            
+            if(!isNaN(w1) && !isNaN(w2)) {
+                const diff = (w2 - w1).toFixed(1);
+                const el = document.getElementById('deltaWeight');
+                el.className = 'diff-val ' + (diff >= 0 ? 'diff-green' : 'diff-red');
+                el.innerText = (diff > 0 ? "+" : "") + diff + " kg";
+            } else {
+                document.getElementById('deltaWeight').innerText = "--";
+            }
+        }
+
+        function closeComparison() {
+            document.getElementById('compOverlay').classList.remove('active');
+        }
+
+
+        // --- VIEW POST LOGIC ---
+        function openViewPost(id) {
+            currentPost = galleryPosts.find(p => p.id === id);
+            slideIndex = 0;
+            updateSlider();
+
+            const history = getStatsForDate(currentPost.dateCaptured);
+
+            document.getElementById('vpDateCapTitle').innerText = formatDate(currentPost.dateCaptured);
+            document.getElementById('vpTagDisplay').innerText = currentPost.tag;
+            document.getElementById('vpDatePost').innerText = formatDate(currentPost.datePosted);
+            document.getElementById('vpWeight').innerText = history.Weight;
+            document.getElementById('vpBMI').innerText = history.BMI;
+            document.getElementById('vpDiaryDisplay').innerText = currentPost.diary;
+
+            document.getElementById('viewPostOverlay').classList.add('active');
+        }
+
+        function closeViewPost() { document.getElementById('viewPostOverlay').classList.remove('active'); }
+
+        function slide(dir) {
+            slideIndex += dir;
+            if(slideIndex < 0) slideIndex = currentPost.images.length - 1;
+            if(slideIndex >= currentPost.images.length) slideIndex = 0;
+            updateSlider();
+        }
+
+        function updateSlider() {
+            const imgObj = currentPost.images[slideIndex];
+            document.getElementById('vpImg').src = imgObj.url;
+            document.getElementById('vpCatLabel').innerText = imgObj.cat;
+            
+            const dotsContainer = document.getElementById('vpDots');
+            dotsContainer.innerHTML = '';
+            currentPost.images.forEach((_, idx) => {
+                const dot = document.createElement('div');
+                dot.style.width = '8px'; dot.style.height = '8px';
+                dot.style.borderRadius = '50%'; 
+                dot.style.background = idx === slideIndex ? 'var(--color-accent)' : 'rgba(255,255,255,0.2)';
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        // --- UTILS ---
+        function tryClosePost() {
+            document.getElementById('safetyDialog').style.display = 'flex';
+        }
+
+        function confirmDiscard() {
+            document.getElementById('safetyDialog').style.display = 'none';
+            document.getElementById('newPostOverlay').classList.remove('active');
+            clearForm();
+        }
+
+        function clearForm() {
+            document.querySelectorAll('.np-input').forEach(i => i.value = '');
+            document.getElementById('inDiary').value = '';
+        }
+
+        function formatDate(dateStr) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateStr).toLocaleDateString('en-US', options).toUpperCase();
+        }
+
+    </script>
+</body>
+</html>

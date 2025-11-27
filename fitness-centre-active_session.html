@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Centre | Active Session</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" />
+
+    <style>
+        /* --- SYSTEM VARIABLES (TACTICAL HUD) --- */
+        :root {
+            --font-header: 'Oswald', sans-serif;
+            --font-body: 'Red Hat Display', sans-serif;
+            
+            --color-bg: #050505;
+            --color-accent: #00e5ff; /* Cyan */
+            --color-accent-dim: rgba(0, 229, 255, 0.15);
+            --color-gold: #FFD700;
+            
+            --color-grace: #d63384; /* Grace Pink */
+            --color-luteal: #9b59b6; /* Luteal Purple */
+            
+            --color-white: #ffffff;
+            --color-white-muted: rgba(255, 255, 255, 0.6);
+            
+            --glass-bg: rgba(20, 20, 20, 0.6);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            
+            --bg-image: url('https://i.imgur.com/CdFreDF.jpeg');
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            height: 100vh; width: 100vw; display: flex;
+            background-image: var(--bg-image); 
+            background-size: cover; background-position: center;
+            font-family: var(--font-body); color: var(--color-white); 
+            overflow: hidden;
+            background-color: var(--color-bg);
+        }
+        
+        /* Dark Overlay */
+        body::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: -1;
+        }
+
+        /* --- LEFT PANEL (STRATEGIC OVERVIEW) --- */
+        .left-panel {
+            width: 350px; height: 100%; position: relative;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 40px; border-right: var(--glass-border);
+            background: #0a0a0a;
+            z-index: 1;
+        }
+        
+        /* Slideshow Background Layer */
+.slideshow-bg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 50%;
+    background-size: cover; background-position: center;
+    mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
+    
+    opacity: 0; /* Hidden by default */
+    transition: opacity 2s ease-in-out; /* Smooth 2-second fade */
+    z-index: 0;
+}
+
+/* The active layer that is currently visible */
+.slideshow-bg.active {
+    opacity: 0.4; 
+    z-index: 1;
+}
+
+        .date-display { 
+            position: relative; z-index: 2; margin-bottom: 5px; 
+            font-size: 12px; color: var(--color-accent); 
+            letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
+        }
+        .day-display { 
+            position: relative; z-index: 2; font-family: var(--font-header); 
+            font-size: 48px; line-height: 1; text-transform: uppercase; 
+            margin-bottom: 30px; color: var(--color-white);
+            text-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+        .session-name-display { 
+    position: relative; z-index: 2; 
+    font-family: var(--font-header); font-size: 24px; 
+    color: var(--color-accent); /* Cyan to show it's System Data */
+    text-transform: uppercase; letter-spacing: 3px; 
+    margin-bottom: 20px; line-height: 1.1;
+    text-shadow: 0 0 15px var(--color-accent-dim);
+}
+        .target-box { 
+            position: relative; z-index: 2; 
+            border-left: 2px solid var(--color-accent); padding-left: 20px; 
+            margin-bottom: 40px;
+        }
+        .target-label { font-size: 10px; color: var(--color-white-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px;}
+        .target-list { font-size: 14px; color: #fff; font-weight: 400; line-height: 1.5; }
+
+        /* --- RIGHT PANEL (WORKOUT FEED) --- */
+        .right-panel { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; }
+
+        /* Header Bar */
+        .stats-bar {
+            height: 80px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 40px; border-bottom: var(--glass-border);
+            background: rgba(0,0,0,0.2); backdrop-filter: blur(5px);
+        }
+        
+        .back-link { 
+            cursor: pointer; display: flex; align-items: center; gap: 10px; 
+            color: var(--color-white-muted); transition: 0.3s; text-decoration: none; 
+            font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+        }
+        .back-link:hover { color: var(--color-accent); gap: 15px; }
+        
+        /* Active Timer & Stats */
+        #activeTimerArea { display:none; gap:30px; align-items:center; }
+        #sessionTimer { 
+            color: var(--color-accent); font-family: 'Courier New', monospace; 
+            font-weight: 700; letter-spacing: 2px; font-size: 16px; 
+            text-shadow: 0 0 10px var(--color-accent-dim);
+        }
+        
+        .stat-item { font-size: 12px; color: var(--color-white-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .highlight { color: var(--color-white); font-weight: 700; margin-left: 5px; }
+
+        /* Workout Feed */
+        .workout-container { 
+            flex: 1; overflow-y: auto; padding: 40px; 
+            display: flex; flex-direction: column; gap: 20px; scroll-behavior: smooth; 
+        }
+        .workout-container::-webkit-scrollbar { width: 4px; }
+        .workout-container::-webkit-scrollbar-thumb { background: var(--color-accent); }
+        
+        .workout-title { 
+            font-family: var(--font-header); font-size: 42px; margin-bottom: 20px; 
+            color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.8);
+            letter-spacing: 3px; text-transform: uppercase;
+        }
+        
+        /* Group Header */
+        .group-header {
+            font-family: var(--font-header); font-size: 18px; color: var(--color-accent);
+            margin-top: 30px; margin-bottom: 15px; text-transform: uppercase;
+            letter-spacing: 4px; border-bottom: 1px solid var(--color-accent-dim);
+            padding-bottom: 5px; display: flex; align-items: center; gap: 10px;
+        }
+        .group-header:first-child { margin-top: 0; }
+
+        /* Exercise Card */
+        .ex-card { 
+            background: rgba(255,255,255,0.03); 
+            border: var(--glass-border); 
+            padding: 25px; 
+            display: flex; flex-direction: column; gap: 15px;
+            transition: 0.3s; position: relative;
+        }
+        .ex-card:hover { background: rgba(255,255,255,0.05); border-color: var(--color-white-muted); }
+        
+        .ex-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .ex-name { font-family: var(--font-header); font-size: 20px; margin-bottom: 5px; letter-spacing: 1px; color: #fff; }
+        .ex-meta { font-size: 10px; color: var(--color-white-muted); text-transform: uppercase; letter-spacing: 1px; }
+        
+        .card-actions { display: flex; gap: 15px; }
+        .action-icon { color: #444; font-size: 18px !important; cursor: pointer; transition: 0.2s; }
+        .action-icon:hover { color: var(--color-accent); }
+        .action-icon.has-note { color: var(--color-white); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+
+        /* Sets Grid */
+        .sets-wrapper { display: flex; flex-direction: column; gap: 5px; }
+        .ex-grid { 
+            display: grid; grid-template-columns: 60px 1fr 1fr 40px; 
+            align-items: center; padding: 10px 15px; 
+            background: #000; border: 1px solid #222; 
+            transition: 0.2s;
+        }
+        .ex-grid:hover { border-color: #444; }
+        
+        .set-idx { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        .set-data { font-size: 14px; color: #ddd; font-weight: 500; display: flex; align-items: baseline; gap: 4px; font-family: 'Red Hat Display'; }
+        .set-unit { font-size: 10px; color: #666; }
+        
+        /* Checkbox */
+        .check-box { 
+            width: 20px; height: 20px; border: 1px solid #444; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; transition: 0.2s; 
+        }
+        .check-box:hover { border-color: var(--color-accent); }
+        .check-box.checked { background: var(--color-accent); border-color: var(--color-accent); color: #000; }
+        .check-box span { font-size: 14px; font-weight: bold; display: none; }
+        .check-box.checked span { display: block; }
+
+        /* --- LOCKED MODE --- */
+        .locked-mode .check-box { display: none !important; }
+        .locked-mode .btn-finish-wrapper { display: none !important; }
+        .locked-mode .ex-grid { opacity: 0.5; }
+        .progress-hidden { display: none !important; }
+
+        /* --- CONTROL DECK (BOTTOM BAR) --- */
+        .action-bar { 
+            height: 100px; border-top: var(--glass-border); 
+            display: flex; align-items: center; justify-content: center; padding: 0 40px; 
+            background: #0a0a0a; z-index: 10;
+        }
+        
+        .controls-lobby, .controls-focus { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+        .controls-focus { display: none; }
+
+        /* Buttons */
+        .btn-start { 
+            background: var(--color-accent); color: #000; border: none; 
+            padding: 15px 50px; font-family: var(--font-header); 
+            font-size: 20px; letter-spacing: 3px; text-transform: uppercase; 
+            cursor: pointer; transition: 0.3s; box-shadow: 0 0 30px var(--color-accent-dim);
+        }
+        .btn-start:hover { background: #fff; transform: scale(1.05); }
+
+        /* Luteal Toggle */
+        .toggle-wrapper { display: flex; align-items: center; gap: 10px; opacity: 0.7; transition: 0.3s; cursor: pointer;}
+        .toggle-wrapper:hover { opacity: 1; color: var(--color-luteal); }
+        .toggle-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+        
+        .switch { position: relative; display: inline-block; width: 36px; height: 18px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: #aaa; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--color-luteal); }
+        input:checked + .slider:before { transform: translateX(18px); background-color: #fff; }
+
+        /* Grace Button */
+        .btn-grace { 
+            background: transparent; border: 1px solid #444; color: #888; 
+            padding: 10px 20px; cursor: pointer; 
+            font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; 
+            display: flex; align-items: center; gap: 8px; transition: 0.3s; 
+        }
+        .btn-grace:hover { border-color: var(--color-grace); color: var(--color-grace); box-shadow: 0 0 15px rgba(214, 51, 132, 0.2); }
+
+        /* --- ACTIVE CONTROLS --- */
+        .timer-capsule {
+            background: #222; color: var(--color-white); padding: 15px 30px; 
+            font-family: 'Courier New', monospace; font-size: 24px; letter-spacing: 2px;
+            min-width: 160px; text-align: center; font-weight: 700; border: 1px solid #444;
+        }
+        
+        .btn-pause {
+            background: transparent; border: 1px solid #555; width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; transition: 0.3s;
+        }
+        .btn-pause:hover { border-color: var(--color-accent); color: var(--color-accent); box-shadow: 0 0 15px var(--color-accent-dim); }
+        .btn-pause.paused { border-color: var(--color-gold); color: var(--color-gold); animation: pulse 2s infinite; }
+        
+        .btn-rest {
+            background: #333; color: #aaa; border: 1px solid #444; padding: 15px 30px; 
+            font-family: var(--font-header); font-size: 16px; letter-spacing: 2px; min-width: 120px;
+            cursor: pointer; text-transform: uppercase; font-weight: 400; transition: 0.3s;
+        }
+        .btn-rest:hover { border-color: #fff; color: #fff; }
+        .btn-rest.active { background: var(--color-accent); color: #000; border-color: var(--color-accent); font-weight: 700; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .btn-finish-wrapper { margin-top: 40px; display: flex; justify-content: center; padding-bottom: 20px; }
+        .btn-finish {
+            background: transparent; color: var(--color-accent); border: 1px solid var(--color-accent);
+            padding: 15px 50px; font-family: var(--font-header); font-size: 18px;
+            letter-spacing: 3px; text-transform: uppercase; 
+            cursor: pointer; transition: 0.3s;
+        }
+        .btn-finish:hover { background: var(--color-accent); color: #000; box-shadow: 0 0 30px var(--color-accent-dim); }
+
+        /* --- MODALS (SYSTEM) --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 200; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        
+        .note-card { 
+            background: #0a0a0a; width: 450px; padding: 30px; 
+            border: 1px solid var(--color-accent); box-shadow: 0 0 60px rgba(0, 229, 255, 0.15); 
+        }
+        .note-header { font-family: var(--font-header); margin-bottom: 15px; color: #fff; font-size: 24px; letter-spacing: 2px;}
+        .note-area { 
+            width: 100%; height: 150px; background: rgba(255,255,255,0.05); border: 1px solid #333; 
+            padding: 15px; font-family: var(--font-body); font-size: 14px; color: #fff; 
+            resize: none; outline: none; margin-bottom: 20px;
+        }
+        .note-area:focus { border-color: var(--color-accent); }
+        
+        .modal-footer { display: flex; justify-content: flex-end; gap: 20px; }
+        .btn-modal { background: none; border: none; cursor: pointer; font-weight: 700; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+        .btn-save { color: var(--color-accent); }
+        .btn-cancel { color: #666; } .btn-cancel:hover { color: #fff; }
+
+        /* FIX: Hide Grace Modal by default and center it */
+        .grace-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 200; justify-content: center; align-items: center; backdrop-filter: blur(5px);
+        }
+        .grace-modal.active { display: flex; }
+
+        /* Grace Modal */
+        .grace-card { background: #111; border: 1px solid var(--color-grace); width: 400px; padding: 40px; text-align: center; box-shadow: 0 0 60px rgba(214, 51, 132, 0.2); }
+        .grace-title { font-family: var(--font-header); font-size: 32px; margin-bottom: 15px; color: #fff; letter-spacing: 2px; }
+        .grace-sub { color: #aaa; font-size: 12px; line-height: 1.6; margin-bottom: 30px; }
+        .grace-input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 15px; text-align: center; font-family: var(--font-body); margin-bottom: 20px; outline: none;}
+        .grace-input:focus { border-color: var(--color-grace); }
+        .grace-btn-confirm { background: var(--color-grace); color: white; border: none; padding: 15px 40px; cursor: pointer; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; width: 100%; }
+
+        /* Idle Screen */
+        .idle-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .idle-msg { font-family: var(--font-header); font-size: 60px; color: #333; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 5px; }
+        
+        /* History Modal Styles */
+        #historyModal { background: #0a0a0a !important; border: 1px solid var(--color-accent) !important; box-shadow: 0 0 60px rgba(0,229,255,0.2) !important; }
+        .history-entry { background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 15px; margin-bottom: 10px; }
+        .pb-crown { color: var(--color-gold); text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+
+        /* Success Modal */
+        .success-card {
+            background: #0a0a0a; width: 500px; padding: 50px; 
+            border: 1px solid var(--color-accent); box-shadow: 0 0 100px rgba(0, 229, 255, 0.3);
+            text-align: center; position: relative; z-index: 201;
+        }
+        .success-title { font-family: var(--font-header); font-size: 48px; color: transparent; -webkit-text-stroke: 1px #fff; margin-bottom: 30px; letter-spacing: 2px; }
+        .success-points { color: var(--color-accent); font-weight: bold; font-size: 18px; margin-bottom: 10px; text-shadow: 0 0 10px var(--color-accent-dim); }
+        .btn-awesome { 
+            background: var(--color-accent); color: #000; border: none; padding: 15px 50px; margin-top: 30px;
+            font-family: var(--font-header); letter-spacing: 3px; font-size: 18px; cursor: pointer; text-transform: uppercase;
+        }
+        .btn-awesome:hover { background: #fff; }
+        
+        #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="left-panel">
+    <div class="slideshow-bg active" id="slideLayer1"></div>
+<div class="slideshow-bg" id="slideLayer2"></div>
+    
+    <div class="date-display" id="dateStr">--</div>
+    <div class="day-display" id="dayStr">--</div>
+    
+    <div class="session-name-display" id="sessionTitleDisplay">LOADING...</div>
+    
+    <div class="target-box">
+        <div class="target-label">PRIMARY MUSCLE TARGETS</div>
+        <div class="target-list" id="targetList">--</div>
+    </div>
+</div>
+
+    <div class="right-panel">
+        <div class="stats-bar">
+            <a href="FITNESS-CENTRE.html" class="back-link" id="topExitBtn"><span class="material-symbols-outlined" style="font-size:14px">arrow_back</span> LOBBY</a>
+            
+            <div id="activeTimerArea">
+                <div id="sessionTimer">00:00</div>
+                <div class="stat-item"><span id="exCount" style="color:#fff; font-weight:700; font-size:16px">0</span> EXERCISES</div>
+                <div class="stat-item">COMPLETE <span class="highlight" id="completionRate">0%</span></div>
+            </div>
+            <div id="lobbyStats" class="stat-item"><span id="exCountLobby" style="color:#fff; font-weight:700; font-size:16px">0</span> EXERCISES <span class="highlight progress-hidden" id="completionRateLobby">0%</span></div>
+        </div>
+
+        <div class="workout-container locked-mode" id="workoutFeed">
+            <div class="workout-title">
+                <span id="workoutName">INITIALIZING...</span>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <div class="controls-lobby" id="ctrlLobby">
+                <div class="toggle-wrapper">
+                    <label class="switch">
+                        <input type="checkbox" id="lutealToggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="toggle-label">LUTEAL PHASE</span>
+                </div>
+
+                <button class="btn-start" onclick="startWorkoutRoutine()">START WORKOUT</button>
+
+                <button class="btn-grace" onclick="openGraceModal()">
+                    <span>GRACE PROTOCOL</span>
+                    <span class="material-symbols-outlined" style="font-size:14px;">spa</span>
+                </button>
+            </div>
+
+            <div class="controls-focus" id="ctrlFocus">
+                <div class="timer-capsule" id="mainTimerDisplay">00:00:00</div>
+                
+                <button class="btn-pause" onclick="togglePause()">
+                    <span class="material-symbols-outlined" id="pauseIcon">pause</span>
+                </button>
+                
+                <button class="btn-rest" id="btnRest" onclick="toggleRest()">REST</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grace-modal" id="graceModal">
+        <div class="grace-card">
+            <div class="grace-title">GRACE PROTOCOL</div>
+            <div class="grace-sub">Acknowledged. Streak paused without penalty. Log reason for data continuity.</div>
+            <input type="text" class="grace-input" id="graceReason" placeholder="REASON (e.g. PCOS Flare, Travel)">
+            <button class="grace-btn-confirm" onclick="confirmGrace()">CONFIRM STATUS</button>
+            <div style="margin-top:20px; font-size:10px; color:#555; cursor:pointer; text-transform:uppercase; letter-spacing:2px;" onclick="closeGraceModal()">CANCEL</div>
+        </div>
+    </div>
+
+    <div class="idle-screen" id="idleScreen">
+        <div class="idle-msg">SYSTEM IDLE</div>
+        <div style="color:#666; margin-bottom:40px; font-size:12px; letter-spacing:2px; text-transform:uppercase;">NO OPERATIONS SCHEDULED FOR TODAY</div>
+        <a href="fitness-centre-training_deck.html" style="color:var(--color-accent); text-decoration:none; border:1px solid var(--color-accent); padding:15px 40px; font-weight:700; letter-spacing:2px; font-size:12px;">OPEN DECK</a>
+    </div>
+
+    <div class="modal-overlay" id="confirmFinishModal">
+        <div class="grace-card" style="border-color:var(--color-accent); box-shadow:0 0 50px rgba(0,229,255,0.2)">
+            <div class="grace-title" style="font-size:24px;">FINISH WORKOUT?</div>
+            <div class="grace-sub">All progress will be saved to the Archives.</div>
+            <div style="display:flex; gap:20px; justify-content:center;">
+                <button class="btn-start" style="padding:10px 30px; font-size:14px;" onclick="confirmFinish()">CONFIRM</button>
+                <button class="btn-grace" style="border:1px solid #555; color:#888;" onclick="closeConfirmFinish()">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="successModal" style="background:rgba(0,0,0,0.95);">
+        <div class="success-card">
+            <div class="success-title" id="receiptTitle">WORKOUT COMPLETE!</div>
+            
+            <div style="background:rgba(255,255,255,0.1); padding:5px 10px; display:inline-block; margin-bottom:20px; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#fff;" id="receiptSub">
+                Full Workout Acknowledged
+            </div>
+
+            <div class="success-data" style="font-size:14px; color:#aaa; line-height:1.8;">
+                <div>Number of Exercises Completed: <span style="color:#fff; font-weight:700" id="rcptCount">0</span></div>
+                <div style="margin-bottom:15px;">Current Streak: <span style="color:#fff; font-weight:700" id="rcptStreak">0</span> 🔥</div>
+                
+                <div>Productivity Time: <span style="color:#fff" id="rcptTime">00:00:00</span></div>
+                <div style="color:var(--color-accent); font-weight:700; margin-top:10px;">+<span id="rcptFP">0</span> FP Earned!</div>
+                <div style="color:var(--color-accent); font-weight:700;">+<span id="rcptMGP">0</span> MGP Earned!</div>
+                <div style="color:#27ae60; font-weight:700; margin-top:5px; text-shadow:0 0 10px rgba(39, 174, 96, 0.4);">+<span id="rcptPrestige">0</span> Prestige Earned!</div>
+            </div>
+
+            <button class="btn-awesome" onclick="window.location.href='FITNESS-CENTRE.html'">Awesome!</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="noteModal">
+        <div class="note-card">
+            <div class="note-header">TACTICAL NOTES</div>
+            <textarea class="note-area" id="noteInput" placeholder="LOG OBSERVATIONS..."></textarea>
+            <div class="modal-footer">
+                <button class="btn-modal btn-cancel" onclick="closeNoteModal()">CANCEL</button>
+                <button class="btn-modal btn-save" onclick="saveNote()">SAVE LOG</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="historyModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:90%; max-width:420px; padding:30px; z-index:1000;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
+            <h3 id="histTitle" style="margin:0; font-size: 20px; letter-spacing: 2px; color:#fff; text-transform: uppercase; font-family: 'Oswald'">HISTORY</h3>
+            <span onclick="closeHistory()" style="cursor:pointer; color: #666;">✕</span>
+        </div>
+        <div id="historyListContainer" style="max-height:400px; overflow-y:auto;"></div>
+    </div>
+    <div id="modalOverlay" onclick="closeHistory()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index:999;"></div>
+
+    <script src="js/core.js"></script>
+
+    <script>
+
+        // --- CONFIG & VARS ---
+        const slideShowImages = [
+	"https://i.imgur.com/lbcb9tj.jpeg", 
+	"https://i.imgur.com/hToBUuM.jpeg",
+	"https://i.imgur.com/aMaJfTp.jpeg",
+	"https://i.imgur.com/wjQbqIs.jpeg",
+	"https://i.imgur.com/ywKZQb9.jpeg",
+	"https://i.imgur.com/UG9lf5X.jpeg",
+	"https://i.imgur.com/wh0kZ6y.jpeg",
+	"https://i.imgur.com/05nS20F.jpeg",
+	"https://i.imgur.com/fukQ6BA.jpeg",
+	"https://i.imgur.com/790ctIb.jpeg",
+	"https://i.imgur.com/offJcgG.jpeg",
+	"https://i.imgur.com/TUUa0Eu.jpeg",
+	"https://i.imgur.com/GSkeOx8.jpeg",
+	"https://i.imgur.com/DcQRsqD.jpeg",
+	"https://i.imgur.com/V4huiGE.jpeg",
+	"https://i.imgur.com/HKAhTTe.jpeg",
+	"https://i.imgur.com/JKBgNZe.jpeg",
+	"https://i.imgur.com/YpyakoM.jpeg",
+	"https://i.imgur.com/okLj8Ad.jpeg",
+	"https://i.imgur.com/kd6whI3.jpeg",
+	"https://i.imgur.com/m8iz2WD.jpeg",
+	"https://i.imgur.com/i9qQXjd.jpeg",
+	"https://i.imgur.com/2Zxcy6e.jpeg",
+	"https://i.imgur.com/5glEiAm.jpeg",
+	"https://i.imgur.com/4LF4GYw.jpeg",
+	"https://i.imgur.com/a4dETWF.jpeg",
+	"https://i.imgur.com/9fqcD2d.jpeg",
+	"https://i.imgur.com/OpHmT8f.jpeg",
+	"https://i.imgur.com/enZG5Io.jpeg",
+	"https://i.imgur.com/UJiJDeC.jpeg",
+	"https://i.imgur.com/dlB0F6Z.jpeg",
+	"https://i.imgur.com/NooSFfp.jpeg",
+	"https://i.imgur.com/SA4IvKU.jpeg",
+	"https://i.imgur.com/VACkWxf.jpeg",
+	"https://i.imgur.com/aeszLXa.jpeg",
+	"https://i.imgur.com/9fAKp9l.jpeg",
+	"https://i.imgur.com/yHYnPgz.jpeg",
+	"https://i.imgur.com/q2SItZa.jpeg",
+	"https://i.imgur.com/968GUAa.jpeg",
+	"https://i.imgur.com/AG7xP40.jpeg",
+	"https://i.imgur.com/GarrWYV.jpeg",
+	"https://i.imgur.com/QoHzwG7.jpeg",
+	"https://i.imgur.com/Rgrr6be.jpeg",
+	"https://i.imgur.com/lzpFqgD.jpeg",
+	"https://i.imgur.com/uqBEAr4.jpeg",
+	"https://i.imgur.com/Jc0g45s.jpeg",
+	"https://i.imgur.com/XdAhcJ6.jpeg",
+	"https://i.imgur.com/mdJgN34.jpeg",
+	"https://i.imgur.com/BVtUe6a.jpeg",
+	"https://i.imgur.com/vXcCgBD.jpeg",
+	"https://i.imgur.com/bxoDTxB.jpeg",
+	"https://i.imgur.com/4Ugz9bB.jpeg",
+	"https://i.imgur.com/BRaniyV.jpeg",
+	"https://i.imgur.com/Emy7Umw.jpeg",
+	"https://i.imgur.com/fNTR796.jpeg",
+	"https://i.imgur.com/ZUxEG8j.jpeg",
+	"https://i.imgur.com/1ftMXtM.jpeg",
+	"https://i.imgur.com/VF8eruS.jpeg",
+	"https://i.imgur.com/WLSA9Gt.jpeg",
+	"https://i.imgur.com/XalgAa1.jpeg",
+	"https://i.imgur.com/CU2aEvt.jpeg",
+	"https://i.imgur.com/vylLHuk.jpeg",
+	"https://i.imgur.com/chPnkNp.jpeg",
+	"https://i.imgur.com/vNHEdjW.jpeg",
+	"https://i.imgur.com/lrNBjvY.jpeg",
+	"https://i.imgur.com/QG1mGuU.jpeg",
+	"https://i.imgur.com/QYk0sxj.jpeg",
+	"https://i.imgur.com/heX3gKa.jpeg",
+	"https://i.imgur.com/IAvCFfG.jpeg",
+	"https://i.imgur.com/PS2nYlE.jpeg",
+	"https://i.imgur.com/YRCaaiT.jpeg",
+	"https://i.imgur.com/78oowSp.jpeg",
+	"https://i.imgur.com/FQdWQGf.jpeg",
+	"https://i.imgur.com/CTSyHlQ.jpeg",
+	"https://i.imgur.com/1VoyCkG.jpeg",
+	"https://i.imgur.com/IpxGOPs.jpeg",
+	"https://i.imgur.com/SxuSZGn.jpeg",
+	"https://i.imgur.com/TKL9ChZ.jpeg",
+	"https://i.imgur.com/0YMJ3l9.jpeg",
+	"https://i.imgur.com/LGHG8Fx.jpeg",
+	"https://i.imgur.com/0jJ3uxo.jpeg",
+	"https://i.imgur.com/M8dO0lq.jpeg",
+	"https://i.imgur.com/TMhlqeg.jpeg",
+	"https://i.imgur.com/txJTvDa.jpeg",
+	"https://i.imgur.com/0p03N50.jpeg",
+	"https://i.imgur.com/sqNLyMg.jpeg",
+	"https://i.imgur.com/rXzfeTJ.jpeg",
+	"https://i.imgur.com/jQk3bJM.jpeg",
+	"https://i.imgur.com/TD0lfOc.jpeg",
+	"https://i.imgur.com/SNLTIJc.jpeg",
+	"https://i.imgur.com/6B2EqmL.jpeg",
+	"https://i.imgur.com/xLKNNOZ.jpeg",
+	"https://i.imgur.com/9gxb2WT.jpeg",
+	"https://i.imgur.com/uAGNCW9.jpeg",
+	"https://i.imgur.com/YND361s.jpeg",
+	"https://i.imgur.com/YgqAPrK.jpeg",
+	"https://i.imgur.com/OvgBKmQ.jpeg",
+	"https://i.imgur.com/orgR9JJ.jpeg",
+	"https://i.imgur.com/VTb0MeB.jpeg",
+	"https://i.imgur.com/xAPjVse.jpeg",
+	"https://i.imgur.com/3xo0XqD.jpeg",
+	"https://i.imgur.com/LUTtItM.jpeg",
+	"https://i.imgur.com/Zo08ViO.jpeg",
+	"https://i.imgur.com/naY9xow.jpeg",
+	"https://i.imgur.com/Qy88O2t.jpeg",
+	"https://i.imgur.com/DPZtmHt.jpeg",
+	"https://i.imgur.com/rtfVXX9.jpeg",
+	"https://i.imgur.com/5WgjqHO.jpeg",
+	"https://i.imgur.com/Ekd0fNx.jpeg",
+	"https://i.imgur.com/TwWTX7p.jpeg",
+	"https://i.imgur.com/OuxRiXH.jpeg",
+	"https://i.imgur.com/E9JsTaJ.jpeg",
+	"https://i.imgur.com/78s9gSZ.jpeg",
+	"https://i.imgur.com/sWb1bfm.jpeg",
+	"https://i.imgur.com/8JEZsJt.jpeg",
+	"https://i.imgur.com/Unorwyq.jpeg",
+	"https://i.imgur.com/HQL3txp.jpeg"
+	];
+
+        const muscleOrder = ["Full Body", "Quads", "Hamstrings", "Glutes", "Hip Flexors", "Back", "Traps", "Lower Back", "Chest", "Shoulders", "Neck", "Triceps", "Biceps", "Forearms", "Abs", "Obliques", "Calf", "Cardio"];
+
+        let currentWorkout = null;
+        let currentSlide = Math.floor(Math.random() * slideShowImages.length);
+        let activeNoteIndex = null;
+
+        let sessionSeconds = 0;
+        let workoutInterval = null;
+        let workoutSeconds = 0; 
+        let isPaused = false;
+        let restInterval = null;
+        let restSeconds = 0;
+        let isResting = false;
+
+        window.onload = function() {
+            initSlideshow();
+            setDateDisplay(); 
+            loadTodayWorkout();
+        };
+
+        // --- 0. DATE LOGIC ---
+        function setDateDisplay() {
+            const today = new Date();
+            document.getElementById('dateStr').innerText = today.toLocaleDateString(undefined, {year:'numeric', month:'long', day:'numeric'});
+            document.getElementById('dayStr').innerText = today.toLocaleDateString(undefined, {weekday:'long'});
+        }
+
+        // --- 1. SLIDESHOW ---
+        function initSlideshow() {
+    if(slideShowImages.length === 0) return;
+
+    const layer1 = document.getElementById('slideLayer1');
+    const layer2 = document.getElementById('slideLayer2');
+    
+    // Track which layer is currently visible (true = layer1, false = layer2)
+    let isLayer1Active = true;
+
+    // 1. Set the initial random image immediately on Layer 1
+    let currentIdx = Math.floor(Math.random() * slideShowImages.length);
+    layer1.style.backgroundImage = `url('${slideShowImages[currentIdx]}')`;
+
+    setInterval(() => {
+        // 2. Pick a new random image
+        let nextIdx = Math.floor(Math.random() * slideShowImages.length);
+        
+        // 3. Determine which layer is 'hidden' right now
+        const hiddenLayer = isLayer1Active ? layer2 : layer1;
+        const visibleLayer = isLayer1Active ? layer1 : layer2;
+
+        // 4. Load the new image onto the hidden layer
+        hiddenLayer.style.backgroundImage = `url('${slideShowImages[nextIdx]}')`;
+
+        // 5. Cross-fade: Reveal the hidden layer, hide the visible one
+        hiddenLayer.classList.add('active');
+        visibleLayer.classList.remove('active');
+
+        // 6. Flip the toggle for next time
+        isLayer1Active = !isLayer1Active;
+
+    }, 6000); // Change every 6 seconds
+}
+
+        // --- 2. WORKOUT LOADER (UPDATED PRIORITY LOGIC) ---
+function loadTodayWorkout() {
+    // 1. Get Today's Date
+    const today = new Date();
+    const dateString = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+    // 2. Check for Resume Data (Crash Protection)
+    // If we were in the middle of a workout and refreshed, load that first.
+    let manualOverride = JSON.parse(localStorage.getItem('lh_active_workout'));
+    
+    // Cleanup: If the resume data is from a different day, trash it.
+    if (manualOverride && manualOverride.date !== dateString) {
+        localStorage.removeItem('lh_active_workout');
+        manualOverride = null;
+    }
+
+    if (manualOverride) { 
+        currentWorkout = manualOverride; 
+        renderWorkout(manualOverride); 
+        return; 
+    }
+
+    // 3. Check the Main Database
+    const templates = JSON.parse(localStorage.getItem('lh_templates')) || [];
+
+    // --- PRIORITY 1: FIND ACTIVE WORK ---
+    // Look for a template dated today that is NOT completed.
+    const activeFound = templates.find(t => t.date === dateString && !t.isCompleted);
+
+    if (activeFound) { 
+        currentWorkout = activeFound; 
+        renderWorkout(activeFound);
+        return;
+    }
+
+    // --- PRIORITY 2: CHECK FOR VICTORIES ---
+    // If no active work exists, THEN check if we finished one today.
+    const finishedFound = templates.find(t => t.date === dateString && t.isCompleted);
+
+    if (finishedFound) {
+        // Show Victory Screen
+        const idleScreen = document.getElementById('idleScreen');
+        idleScreen.style.display = 'flex';
+        idleScreen.querySelector('.idle-msg').innerText = "MISSION COMPLETE";
+        idleScreen.querySelector('.idle-msg').nextElementSibling.innerText = "PROTOCOL ARCHIVED. RECOVERY MODE ACTIVE.";
+        return; 
+    }
+
+    // --- PRIORITY 3: SYSTEM IDLE ---
+    // No active work, no finished work.
+    document.getElementById('idleScreen').style.display = 'flex'; 
+}
+
+        function renderWorkout(workout) {
+            document.getElementById('workoutName').innerText = workout.name;
+	document.getElementById('sessionTitleDisplay').innerText = workout.name;
+            const container = document.getElementById('workoutFeed');
+            container.innerHTML = ''; 
+            const exerciseDB = JSON.parse(localStorage.getItem('lh_exercises')) || [];
+            
+            let richExercises = workout.exercises.map((wEx, index) => {
+                const dbEx = exerciseDB.find(e => e.id == wEx.dbId) || { target: ["Unknown"], equip: "Unknown" };
+                return { ...wEx, details: dbEx, originalIndex: index };
+            });
+            
+            richExercises.sort((a, b) => {
+                const muscleA = a.details.target[0] || "Cardio"; const muscleB = b.details.target[0] || "Cardio";
+                return (muscleOrder.indexOf(muscleA) === -1 ? 999 : muscleOrder.indexOf(muscleA)) - (muscleOrder.indexOf(muscleB) === -1 ? 999 : muscleOrder.indexOf(muscleB));
+            });
+
+            const countText = richExercises.length;
+            document.getElementById('exCount').innerText = countText;
+            document.getElementById('exCountLobby').innerText = countText;
+            document.getElementById('targetList').innerText = [...new Set(richExercises.flatMap(ex => ex.details.target))].join(', ');
+
+            let lastGroup = null;
+            richExercises.forEach(ex => {
+                const primaryMuscle = ex.details.target[0] || "General";
+                if (primaryMuscle !== lastGroup) {
+                    const header = document.createElement('div'); header.className = 'group-header'; header.innerText = primaryMuscle; 
+                    container.appendChild(header); lastGroup = primaryMuscle;
+                }
+                let setsHTML = '<div class="sets-wrapper">';
+                ex.sets.forEach((set, i) => {
+                    setsHTML += `<div class="ex-grid"><div class="set-idx">SET ${i+1}</div><div class="set-data">${set[0]||"-"} <span class="set-unit">KG</span></div><div class="set-data">${set[1]||"-"} <span class="set-unit">REPS</span></div><div class="check-box" onclick="this.classList.toggle('checked'); updateProgress()"><span class="material-symbols-outlined" style="font-size:16px">check</span></div></div>`;
+                });
+                setsHTML += '</div>';
+                
+                const hasNoteClass = (ex.note && ex.note.trim() !== "") ? 'has-note' : '';
+                
+                const card = document.createElement('div'); card.className = 'ex-card';
+                card.innerHTML = `
+                    <div class="ex-header">
+                        <div>
+                            <div class="ex-name">${ex.name}</div>
+                            <div class="ex-meta">${ex.details.target.join(', ')} • ${ex.details.equip}</div>
+                        </div>
+                        <div class="card-actions">
+                            <span id="noteBtn_${ex.originalIndex}" class="material-symbols-outlined action-icon ${hasNoteClass}" onclick="openNoteModal(${ex.originalIndex})" title="Tactical Note">chat</span>
+                            <span class="material-symbols-outlined action-icon" onclick="openHistory(${ex.dbId}, '${ex.name.replace(/'/g, "\\'")}')" title="History Log">history</span>
+                        </div>
+                    </div>
+                    ${setsHTML}
+                `;
+                container.appendChild(card);
+            });
+
+            const finishBtnDiv = document.createElement('div');
+            finishBtnDiv.className = 'btn-finish-wrapper';
+            finishBtnDiv.innerHTML = `<button class="btn-finish" onclick="openFinishConfirm()">FINISH WORKOUT</button>`;
+            container.appendChild(finishBtnDiv);
+        }
+
+        function updateProgress() {
+            const total = document.querySelectorAll('.check-box').length;
+            const checked = document.querySelectorAll('.check-box.checked').length;
+            const pct = total === 0 ? 0 : Math.round((checked / total) * 100);
+            document.getElementById('completionRate').innerText = pct + "%";
+            document.getElementById('completionRateLobby').innerText = pct + "%";
+
+            if (pct === 100) { setTimeout(() => { openFinishConfirm(); }, 500); }
+        }
+
+        // --- 3. TIMER LOGIC ---
+        function startWorkoutRoutine() {
+            document.getElementById('workoutFeed').classList.remove('locked-mode');
+            
+            document.getElementById('ctrlLobby').style.display = 'none'; document.getElementById('ctrlFocus').style.display = 'flex';
+            document.getElementById('topExitBtn').style.display = 'none'; document.getElementById('lobbyStats').style.display = 'none';
+            document.getElementById('activeTimerArea').style.display = 'flex'; 
+            
+            startSessionTimer(); runMainTimer();
+        }
+        function startSessionTimer() {
+            const timerDisplay = document.getElementById('sessionTimer');
+            setInterval(() => { sessionSeconds++; const m = Math.floor(sessionSeconds/60); const s = sessionSeconds%60; timerDisplay.innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`; }, 1000);
+        }
+        function runMainTimer() {
+            if(workoutInterval) clearInterval(workoutInterval);
+            workoutInterval = setInterval(() => { if(!isPaused) { workoutSeconds++; document.getElementById('mainTimerDisplay').innerText = formatTime(workoutSeconds); } }, 1000);
+        }
+        function togglePause() { isPaused = !isPaused; const icon = document.getElementById('pauseIcon'); const btn = document.querySelector('.btn-pause'); if(isPaused) { icon.innerText = "play_arrow"; btn.classList.add('paused'); } else { icon.innerText = "pause"; btn.classList.remove('paused'); } }
+        function toggleRest() {
+            const btn = document.getElementById('btnRest');
+            if (!isResting) { isResting = true; restSeconds = 0; btn.classList.add('active'); if(restInterval) clearInterval(restInterval); restInterval = setInterval(() => { restSeconds++; const m = Math.floor(restSeconds/60); const s = restSeconds%60; btn.innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`; }, 1000); } 
+            else { isResting = false; clearInterval(restInterval); btn.classList.remove('active'); btn.innerText = "REST"; }
+        }
+        function formatTime(totalSeconds) { const h = Math.floor(totalSeconds/3600); const m = Math.floor((totalSeconds%3600)/60); const s = totalSeconds%60; return `${h<10?'0'+h:h}:${m<10?'0'+m:m}:${s<10?'0'+s:s}`; }
+
+        // --- 4. NOTES & HISTORY ---
+        function openNoteModal(index) { activeNoteIndex = index; document.getElementById('noteInput').value = currentWorkout.exercises[index].note || ""; document.getElementById('noteModal').style.display = 'flex'; }
+        function saveNote() { 
+            if (activeNoteIndex === null) return; 
+            const noteContent = document.getElementById('noteInput').value;
+            currentWorkout.exercises[activeNoteIndex].note = noteContent; 
+            localStorage.setItem('lh_active_workout', JSON.stringify(currentWorkout)); 
+            const btn = document.getElementById(`noteBtn_${activeNoteIndex}`);
+            if(btn) {
+                if(noteContent && noteContent.trim() !== "") { btn.classList.add('has-note'); } else { btn.classList.remove('has-note'); }
+            }
+            closeNoteModal(); 
+        }
+
+        function closeNoteModal() { document.getElementById('noteModal').style.display = 'none'; activeNoteIndex = null; }
+
+        function openHistory(dbId, exName) {
+            document.getElementById('histTitle').innerText = exName; 
+            const container = document.getElementById('historyListContainer'); 
+            container.innerHTML = '';
+            
+            const templates = JSON.parse(localStorage.getItem('lh_templates')) || [];
+            const logs = templates.filter(t => t.exercises.some(e => e.dbId === dbId));
+            
+            if(logs.length === 0) { 
+                container.innerHTML = '<div style="text-align:center; color:#444; margin-top:20px; font-style:italic; font-size:12px;">NO DATA LOGGED</div>'; 
+            } else {
+                let globalMax = 0; 
+                logs.forEach(log => { 
+                    const specificEx = log.exercises.find(e => e.dbId === dbId);
+                    if(specificEx && specificEx.sets) {
+                        specificEx.sets.forEach(s => { const w = parseFloat(s[0])||0; if(w > globalMax) globalMax = w; }); 
+                    }
+                });
+                
+                logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                logs.forEach(log => {
+                    let specificEx = log.exercises.find(e => e.dbId === dbId);
+                    if (currentWorkout && log.id === currentWorkout.id) {
+                         const liveEx = currentWorkout.exercises.find(e => e.dbId === dbId);
+                         if (liveEx) specificEx = liveEx;
+                    }
+                    let sessionMax = 0; 
+                    if(specificEx.sets) {
+                        specificEx.sets.forEach(s => { const w = parseFloat(s[0])||0; if(w > sessionMax) sessionMax = w; });
+                    }
+                    const crownIcon = (sessionMax === globalMax && globalMax > 0) ? '<span class="pb-crown">♛</span>' : '';
+                    let setsHtml = '<div style="margin-top:10px; display:flex; flex-direction:column; gap:5px;">'; 
+                    if(specificEx.sets) {
+                        specificEx.sets.forEach((set, i) => {
+                            setsHtml += `<div style="display:flex; justify-content:space-between; font-size:12px; color:#ccc;"><span style="color:#666">SET ${i+1}</span><span><strong style="color:#fff">${set[0]||0}</strong> KG x ${set[1]||0}</span></div>`; 
+                        });
+                    }
+                    setsHtml += '</div>';
+                    let noteHtml = '';
+                    if (specificEx.note && specificEx.note.trim() !== "") {
+                        noteHtml = `<div style="margin-top:8px; padding-top:8px; border-top:1px dashed #333; color:var(--color-accent); font-size:11px; font-style:italic; line-height:1.4;">"${specificEx.note}"</div>`;
+                    }
+                    container.innerHTML += `<div class="history-entry"><div style="display:flex; justify-content:space-between; font-size:10px; color:#888; letter-spacing:1px;"><div>${new Date(log.date).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}).toUpperCase()}</div><div>${crownIcon}</div></div>${setsHtml}${noteHtml}</div>`;
+                });
+            }
+            document.getElementById('historyModal').style.display = 'block'; 
+            document.getElementById('modalOverlay').style.display = 'block';
+        }
+        function closeHistory() { document.getElementById('historyModal').style.display = 'none'; document.getElementById('modalOverlay').style.display = 'none'; }
+        
+        function openGraceModal() { document.getElementById('graceModal').style.display = 'flex'; }
+        function closeGraceModal() { document.getElementById('graceModal').style.display = 'none'; }
+        function confirmGrace() {
+            const reason = document.getElementById('graceReason').value;
+            
+            // 1. LOG THE GRACE (System Record)
+            // We push this to the logs so you get credit for the decision
+            if(typeof UserProfile !== 'undefined') {
+                UserProfile.systemLogs.push({
+                    text: `[GRACE PROTOCOL] ${reason}`,
+                    date: new Date().toISOString(),
+                    type: 'grace', 
+                    highlight: true
+                });
+                // We also increment grace usage if you track that
+                if(UserProfile.graceUsed !== undefined) UserProfile.graceUsed++;
+                saveSystemData(); // Save Core.js data
+            }
+
+            // 2. THE MIGRATION (Time Shift)
+            if (currentWorkout) {
+                const templates = JSON.parse(localStorage.getItem('lh_templates')) || [];
+                const idx = templates.findIndex(t => t.id === currentWorkout.id);
+                
+                if (idx !== -1) {
+                    // We calculate "Yesterday"
+                    const d = new Date();
+                    d.setDate(d.getDate() - 1); // Subtract 1 day
+                    const yesterdayStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                    
+                    // We update the template's date to Yesterday
+                    // This forces Training Deck to see it as "Deferred"
+                    // And forces Active Session to ignore it (because it looks for Today)
+                    templates[idx].date = yesterdayStr;
+                    
+                    localStorage.setItem('lh_templates', JSON.stringify(templates));
+                }
+            }
+
+            // 3. CLEAN UP
+            // Remove the 'resume' cache so it doesn't try to load it again
+            localStorage.removeItem('lh_active_workout');
+
+            alert(`Grace Protocol Active: ${reason}`);
+            closeGraceModal();
+            
+            // 4. EXIT STRATEGY
+            window.location.href = 'FITNESS-CENTRE.html'; 
+        }
+
+        /* --- 5. FINISH (PATCHED V3) --- */
+function openFinishConfirm() { document.getElementById('confirmFinishModal').style.display = 'flex'; }
+function closeConfirmFinish() { document.getElementById('confirmFinishModal').style.display = 'none'; }
+
+function confirmFinish() {
+    closeConfirmFinish();
+    isPaused = true; 
+
+    // --- A. DATA ENRICHMENT (Fixing the 0 MGP Bug) ---
+    const exerciseDB = JSON.parse(localStorage.getItem('lh_exercises')) || [];
+    let finishedWorkout = JSON.parse(JSON.stringify(currentWorkout));
+    
+    // Inject missing details (Target/Type) so Core.js knows what to calculate
+    finishedWorkout.exercises = finishedWorkout.exercises.map(ex => {
+        // Use == to allow string/number matching (Fixes ID mismatch)
+        const dbEx = exerciseDB.find(e => e.id == ex.dbId);
+        
+        if (dbEx) {
+            ex.type = dbEx.type;
+            ex.details = { target: dbEx.target };
+        } else {
+            // Fallback: If DB lookup fails, credit Full Body so you get points
+            ex.type = "Reps"; 
+            ex.details = { target: ["Full Body"] };
+        }
+        return ex;
+    });
+
+    // --- B. COUNTING LOGIC (Exercises vs Sets) ---
+    // 1. Total Exercises in the plan
+    const totalExercisesCount = currentWorkout.exercises.length;
+
+    // 2. Count "Fully Completed Cards" in the UI
+    let finalExerciseCount = 0;
+    const uiCards = document.querySelectorAll('.ex-card');
+    
+    uiCards.forEach(card => {
+        const totalBoxes = card.querySelectorAll('.check-box').length;
+        const checkedBoxes = card.querySelectorAll('.check-box.checked').length;
+        // If card has checkboxes and all are checked, it's done.
+        if (totalBoxes > 0 && totalBoxes === checkedBoxes) {
+            finalExerciseCount++;
+        }
+    });
+
+    // 3. Determine Status
+    // If you finished all exercises, the workout is COMPLETE (even if set counts were weird)
+    const isComplete = (finalExerciseCount === totalExercisesCount) && (totalExercisesCount > 0);
+    const isLuteal = document.getElementById('lutealToggle').checked;
+
+    // --- C. CALL THE ENGINE ---
+    const report = processWorkoutSession(finishedWorkout, isLuteal, isComplete);
+
+    // --- D. RENDER RECEIPT ---
+    const titleEl = document.getElementById('receiptTitle');
+    const subEl = document.getElementById('receiptSub');
+    
+    if (isComplete) {
+        titleEl.innerText = "WORKOUT COMPLETE!";
+        subEl.innerText = "🎉 FULL WORKOUT ACKNOWLEDGED 🎉";
+        subEl.style.background = "rgba(0, 229, 255, 0.1)"; // Cyan tint
+        subEl.style.color = "var(--color-accent)";
+    } else {
+        titleEl.innerText = "WORKOUT DONE 👍";
+        subEl.innerText = "PARTIAL SESSION LOGGED";
+        subEl.style.background = "rgba(255, 255, 255, 0.1)"; // Grey tint
+        subEl.style.color = "#ccc";
+    }
+
+    // Display "2 / 2" (using our new distinct variables)
+    document.getElementById('rcptCount').innerText = `${finalExerciseCount} / ${totalExercisesCount}`;
+    
+    // Formatted Time
+    const timeStr = document.getElementById('mainTimerDisplay').innerText;
+    const parts = timeStr.split(':').map(Number);
+    let prettyTime = "";
+    if (parts[0] > 0) prettyTime += `${parts[0]}hr `;
+    if (parts[1] > 0) prettyTime += `${parts[1]}mins`;
+    if (parts[0]===0 && parts[1]===0) prettyTime = `${parts[2]}sec`;
+    document.getElementById('rcptTime').innerText = prettyTime;
+
+    // Points Display
+    document.getElementById('rcptFP').innerText = report.totalFP;
+    document.getElementById('rcptMGP').innerText = report.totalSessionMGP;
+    document.getElementById('rcptPrestige').innerText = report.earnedPrestige;
+    document.getElementById('rcptStreak').innerText = UserProfile.streak;
+
+    // --- E. CLEANUP & SAVE ---
+    localStorage.removeItem('lh_active_workout');
+    
+    const templates = JSON.parse(localStorage.getItem('lh_templates')) || [];
+    const tIndex = templates.findIndex(t => t.id === currentWorkout.id);
+    if(tIndex !== -1) {
+        templates[tIndex].isCompleted = true;
+// Use the global variable 'sessionSeconds' we are already tracking
+        templates[tIndex].durationSeconds = sessionSeconds;
+        localStorage.setItem('lh_templates', JSON.stringify(templates));
+    }
+
+    document.getElementById('successModal').style.display = 'flex';
+    startConfetti();
+}
+
+        // --- 6. CONFETTI (PRESERVED) ---
+        function startConfetti() {
+            const canvas = document.getElementById('confetti-canvas'); const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            const particles = []; const colors = ['#00e5ff', '#ffffff', '#333333'];
+            function createParticle() { return { x: Math.random() * canvas.width, y: -10, size: Math.random() * 5 + 2, color: colors[Math.floor(Math.random() * colors.length)], speedY: Math.random() * 3 + 2, speedX: Math.random() * 2 - 1, rotation: Math.random() * 360 }; }
+            for(let i=0; i<150; i++) particles.push(createParticle());
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach((p, index) => {
+                    p.y += p.speedY; p.x += p.speedX; p.rotation += 2;
+                    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rotation * Math.PI / 180); ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size); ctx.restore();
+                    if (p.y > canvas.height) particles[index] = createParticle();
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+            setTimeout(() => { canvas.style.display = 'none'; }, 6000);
+        }
+
+    </script>
+</body>
+</html>

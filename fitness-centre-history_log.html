@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Centre | History Log</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+
+    <style>
+        /* --- SYSTEM VISUALS --- */
+        :root {
+            --font-header: 'Oswald', sans-serif;
+            --font-body: 'Red Hat Display', sans-serif;
+            --color-bg: #050505;
+            --color-accent: #00e5ff; 
+            --color-accent-dim: rgba(0, 229, 255, 0.1);
+            --color-white: #ffffff;
+            --color-white-muted: rgba(255, 255, 255, 0.5);
+            --glass-bg: rgba(20, 20, 20, 0.6);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            --bg-image: url('https://i.imgur.com/xkHee4y.jpeg');
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            height: 100vh; width: 100vw;
+            background-image: var(--bg-image); 
+            background-size: cover; background-position: center;
+            font-family: var(--font-body); color: var(--color-white); 
+            overflow: hidden; background-color: var(--color-bg);
+        }
+
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, rgba(10,12,14,0.6) 0%, rgba(0,0,0,0.95) 100%);
+            z-index: 0; pointer-events: none;
+        }
+
+        .container {
+            position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column;
+            padding: 30px 50px;
+        }
+
+        /* --- HEADER --- */
+        .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .back-btn { cursor: pointer; color: var(--color-white-muted); transition: 0.3s; font-size: 24px !important; }
+        .back-btn:hover { color: var(--color-accent); transform: translateX(-5px); }
+        .page-title { font-family: var(--font-header); font-size: 32px; line-height: 1; text-transform: uppercase; letter-spacing: 3px; }
+        .page-title span { color: var(--color-accent); }
+
+        /* --- STATS CONSOLE --- */
+        .stats-console {
+            background: var(--glass-bg); border: var(--glass-border); backdrop-filter: blur(10px);
+            margin-bottom: 30px; overflow: hidden; transition: all 0.4s ease;
+            max-height: 80px;
+        }
+        .stats-console.expanded { max-height: 500px; border-color: var(--color-accent); }
+
+        .console-header {
+            height: 80px; padding: 0 30px; display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer;
+        }
+        .console-header:hover .expand-icon { color: var(--color-accent); }
+
+        .quick-stats { display: flex; gap: 40px; }
+        .qs-item { display: flex; flex-direction: column; }
+        .qs-val { font-family: var(--font-header); font-size: 24px; color: #fff; line-height: 1; }
+        .qs-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--color-white-muted); }
+
+        .expand-btn { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--color-accent); display: flex; align-items: center; gap: 5px; }
+        .expand-icon { transition: 0.3s; }
+        .stats-console.expanded .expand-icon { transform: rotate(180deg); }
+
+        .console-details {
+            padding: 30px; border-top: 1px solid rgba(255,255,255,0.05);
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; opacity: 0; transition: 0.3s;
+        }
+        .stats-console.expanded .console-details { opacity: 1; }
+
+        .detail-col-header { font-family: var(--font-header); color: var(--color-accent); letter-spacing: 2px; margin-bottom: 15px; font-size: 14px; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .stat-row span:last-child { color: #fff; font-weight: 700; font-family: 'Courier New', monospace; }
+
+        /* --- HISTORY GRID --- */
+        .history-grid { display: grid; grid-template-columns: 350px 1fr; gap: 30px; flex: 1; overflow: hidden; }
+
+        /* FEED */
+        .feed-col { overflow-y: auto; padding-right: 10px; display: flex; flex-direction: column; gap: 15px; }
+        .feed-col::-webkit-scrollbar { width: 4px; }
+        .feed-col::-webkit-scrollbar-thumb { background: var(--color-accent); }
+
+        .feed-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+            padding: 20px; cursor: pointer; transition: 0.3s; border-left: 3px solid transparent;
+        }
+        .feed-card:hover { background: rgba(255,255,255,0.06); }
+        .feed-card.active { background: rgba(0, 229, 255, 0.05); border-color: var(--color-accent); border-left: 3px solid var(--color-accent); }
+
+        .card-date { font-size: 10px; color: var(--color-accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .card-title { font-family: var(--font-header); font-size: 18px; color: #fff; margin-bottom: 8px; letter-spacing: 1px; }
+        
+        /* CLEAN STATS ROW (No Boxes) */
+        .card-stats-row { 
+            display: flex; gap: 15px; font-size: 10px; color: var(--color-white-muted); 
+            text-transform: uppercase; letter-spacing: 1px; font-weight: 500;
+        }
+        .c-stat span { color: #fff; font-weight: 700; } /* Value highlight */
+
+        /* INSPECTOR */
+        .inspector-col {
+            background: var(--glass-bg); border: var(--glass-border);
+            padding: 40px; display: flex; flex-direction: column; overflow-y: auto;
+        }
+        .inspector-col::-webkit-scrollbar { width: 4px; }
+        .inspector-col::-webkit-scrollbar-thumb { background: #444; }
+
+        .empty-state { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--color-white-muted); opacity: 0.5; }
+
+        .insp-header { margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+        .insp-date { color: var(--color-accent); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+        .insp-title { font-family: var(--font-header); font-size: 36px; color: #fff; text-transform: uppercase; letter-spacing: 2px; }
+        .insp-duration { font-family: 'Courier New', monospace; font-size: 12px; color: #888; margin-top: 5px; }
+
+        .ex-block { margin-bottom: 30px; }
+        .ex-title { font-size: 14px; color: #fff; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; }
+        
+        /* ALIGNMENT FIX: TIGHTER GRID */
+        .set-row { 
+            display: grid; 
+            /* Columns: Index | Weight | "X" | Reps | ...rest */
+            grid-template-columns: 60px 60px 20px 100px; 
+            padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); 
+            font-size: 12px; color: #aaa; align-items: center;
+        }
+        .set-row:last-child { border-bottom: none; }
+        
+        .set-num { text-transform: uppercase; letter-spacing: 1px; font-size: 10px; color: #666; }
+        .set-val { color: #fff; font-weight: 700; font-family: 'Red Hat Display', sans-serif; text-align:right; }
+        .set-x { text-align: center; color: #444; font-size: 10px; }
+        .set-reps { color: var(--color-accent); font-weight: 700; text-align: left; margin-left: 10px;}
+
+    </style>
+</head>
+<body>
+
+    <div class="overlay"></div>
+
+    <div class="container">
+        <div class="top-bar">
+            <div class="header-left">
+                <span class="material-symbols-outlined back-btn" onclick="window.location.href='FITNESS-CENTRE.html'">arrow_back</span>
+                <div class="page-title">WORKOUT <span>HISTORY</span></div>
+            </div>
+        </div>
+
+        <div class="stats-console" id="statsConsole">
+            <div class="console-header" onclick="toggleConsole()">
+                <div class="quick-stats">
+                    <div class="qs-item"><span class="qs-val" id="statTotalWorkouts">0</span><span class="qs-label">Total Workouts</span></div>
+                    <div class="qs-item"><span class="qs-val" id="statTotalHours">0H 0M</span><span class="qs-label">Total Time</span></div>
+                    <div class="qs-item"><span class="qs-val" id="statBestStreak">0</span><span class="qs-label">Best Streak</span></div>
+                </div>
+                <div class="expand-btn">FULL SYSTEM REPORT <span class="material-symbols-outlined expand-icon">expand_more</span></div>
+            </div>
+            <div class="console-details">
+                <div>
+                    <div class="detail-col-header">PERFORMANCE METRICS</div>
+                    <div class="stat-row"><span>Total Fitness Points</span> <span id="detailFP">0</span></div>
+                    <div class="stat-row"><span>Total MGP Earned</span> <span id="detailMGP">0</span></div>
+                    <div class="stat-row"><span>Total Prestige</span> <span id="detailPrestige">0</span></div>
+                    <div class="stat-row"><span>Grace Protocols Used</span> <span id="detailGrace">0</span></div>
+                </div>
+                <div id="muscleStatsCol">
+                    </div>
+                <div>
+                    <div class="detail-col-header">RECORDS</div>
+                    <div class="stat-row"><span>Best Streak</span> <span id="detailStreak">0 Days</span></div>
+                    <div class="stat-row"><span>Total Exercises</span> <span id="detailExTotal">0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-grid">
+            <div class="feed-col" id="feedContainer"></div>
+            <div class="inspector-col" id="inspector">
+                <div class="empty-state"><span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 20px;">fitness_center</span><div>SELECT A SESSION TO INSPECT DATA</div></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/core.js"></script>
+
+    <script>
+        window.onload = function() {
+            if (typeof UserProfile === 'undefined') { console.warn("Core.js missing"); }
+            calculateStats();
+            renderFeed();
+        };
+
+        function toggleConsole() { document.getElementById('statsConsole').classList.toggle('expanded'); }
+
+        function calculateStats() {
+            const templates = JSON.parse(localStorage.getItem('lh_templates')) || [];
+            const exerciseDB = JSON.parse(localStorage.getItem('lh_exercises')) || [];
+            const completed = templates.filter(t => t.isCompleted);
+            
+            // A. Basic Counts
+            document.getElementById('statTotalWorkouts').innerText = completed.length;
+            document.getElementById('statBestStreak').innerText = UserProfile.streak + " DAYS"; 
+            document.getElementById('detailStreak').innerText = UserProfile.streak;
+
+            // B. Time Calculation
+            let totalSeconds = 0;
+            completed.forEach(t => { if(t.durationSeconds) totalSeconds += t.durationSeconds; });
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            document.getElementById('statTotalHours').innerText = `${h}H ${m}M`;
+
+            // C. Points
+            document.getElementById('detailFP').innerText = UserProfile.fitnessPoints.toLocaleString();
+            document.getElementById('detailPrestige').innerText = UserProfile.prestigeCurrency.toLocaleString();
+            
+            let totalMGP = 0;
+            let graceCount = 0;
+            if(UserProfile.systemLogs) {
+                UserProfile.systemLogs.forEach(log => {
+                    if(log.type === 'mgp') {
+                        const match = log.text.match(/\[\+(\d+)/);
+                        if(match) totalMGP += parseInt(match[1]);
+                    }
+                    if(log.type === 'grace') graceCount++;
+                });
+            }
+            document.getElementById('detailMGP').innerText = totalMGP.toLocaleString();
+            document.getElementById('detailGrace').innerText = graceCount;
+
+            // D. Muscle Breakdown (Deep Scan with Fallback)
+            const muscleCounts = {};
+            let totalEx = 0;
+            
+            completed.forEach(t => {
+                if(t.exercises) {
+                    totalEx += t.exercises.length;
+                    t.exercises.forEach(ex => {
+                        let targets = [];
+                        // 1. Check Template Data
+                        if(ex.details && ex.details.target) {
+                            targets = ex.details.target;
+                        } 
+                        // 2. Fallback: Check Master DB if template data missing
+                        if (!targets.length || targets[0] === "Unknown") {
+                            const dbEx = exerciseDB.find(e => e.id == ex.dbId);
+                            if(dbEx) targets = dbEx.target;
+                        }
+
+                        if(targets.length > 0) {
+                            targets.forEach(m => {
+                                if(m !== "Unknown") muscleCounts[m] = (muscleCounts[m] || 0) + 1;
+                            });
+                        }
+                    });
+                }
+            });
+            document.getElementById('detailExTotal').innerText = totalEx;
+
+            const muscleCol = document.getElementById('muscleStatsCol');
+            muscleCol.innerHTML = '<div class="detail-col-header">MUSCLE FREQUENCY</div>';
+            const sortedMuscles = Object.entries(muscleCounts).sort((a,b) => b[1] - a[1]).slice(0, 8); // Increased to Top 8
+            
+            if(sortedMuscles.length === 0) {
+                muscleCol.innerHTML += `<div class="stat-row" style="color:#666">No data recorded yet.</div>`;
+            } else {
+                sortedMuscles.forEach(([muscle, count]) => {
+                    muscleCol.innerHTML += `<div class="stat-row"><span>${muscle}</span> <span>${count}</span></div>`;
+                });
+            }
+        }
+
+        function renderFeed() {
+            const container = document.getElementById('feedContainer');
+            container.innerHTML = '';
+            const templates = JSON.parse(localStorage.getItem('lh_templates')) || [];
+            const history = templates.filter(t => t.isCompleted).sort((a, b) => new Date(b.date) - new Date(a.date));
+            const logs = UserProfile.systemLogs || [];
+
+            if(history.length === 0) {
+                container.innerHTML = '<div style="color:#666; text-align:center; margin-top:50px;">NO RECORDS FOUND</div>';
+                return;
+            }
+
+            history.forEach(workout => {
+                const dateObj = new Date(workout.date);
+                const dateStr = dateObj.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                
+                // Calculate Day Stats
+                const wDateISO = workout.date; 
+                const dayLogs = logs.filter(l => l.date.startsWith(wDateISO));
+                
+                let dayMGP = 0;
+                let dayFP = 0;
+                let dayPrestige = 0;
+
+                dayLogs.forEach(l => {
+                    if(l.type === 'mgp') {
+                        const match = l.text.match(/\[\+(\d+)/);
+                        if(match) dayMGP += parseInt(match[1]);
+                    }
+                    if(l.type === 'workout') { 
+                        if(l.text.includes("FP")) {
+                             const fpMatch = l.text.match(/\+(\d+) FP/); 
+                             if(fpMatch) dayFP += parseInt(fpMatch[1]); 
+                             else dayFP = 20; 
+                        }
+                    }
+                    if(l.type === 'prestige') {
+                        const match = l.text.match(/\[\+(\d+)/);
+                        if(match) dayPrestige += parseInt(match[1]);
+                    }
+                });
+
+                const card = document.createElement('div');
+                card.className = 'feed-card';
+                card.onclick = function() { loadInspector(workout, this); };
+                
+                card.innerHTML = `
+                    <div class="card-date">${dateStr}</div>
+                    <div class="card-title">${workout.name}</div>
+                    <div class="card-stats-row">
+                        <div class="c-stat">+${dayMGP} MGP</div>
+                        <div class="c-stat">•</div>
+                        <div class="c-stat">+${dayFP || '?'} FP</div>
+                        <div class="c-stat">•</div>
+                        <div class="c-stat">+${dayPrestige} PRESTIGE</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function loadInspector(workout, cardEl) {
+            document.querySelectorAll('.feed-card').forEach(c => c.classList.remove('active'));
+            cardEl.classList.add('active');
+
+            const container = document.getElementById('inspector');
+            const dateStr = new Date(workout.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            let durationTxt = "Time not recorded";
+            if(workout.durationSeconds) {
+                const h = Math.floor(workout.durationSeconds / 3600);
+                const m = Math.floor((workout.durationSeconds % 3600) / 60);
+                const s = workout.durationSeconds % 60;
+                durationTxt = `DURATION: ${h}H ${m}M ${s}S`;
+            }
+
+            let content = `
+                <div class="insp-header">
+                    <div class="insp-date">${dateStr}</div>
+                    <div class="insp-title">${workout.name}</div>
+                    <div class="insp-duration">${durationTxt}</div>
+                </div>
+            `;
+
+            if (workout.exercises && workout.exercises.length > 0) {
+                workout.exercises.forEach(ex => {
+                    content += `
+                        <div class="ex-block">
+                            <div class="ex-title">
+                                <span>${ex.name}</span>
+                                <span style="color:var(--color-white-muted)">${ex.type || ''}</span>
+                            </div>
+                    `;
+                    
+                    if (ex.sets && ex.sets.length > 0) {
+                        ex.sets.forEach((set, i) => {
+                            // ALIGNMENT FIX: TIGHTER GRID
+                            content += `
+                                <div class="set-row">
+                                    <div class="set-num">SET ${i+1}</div>
+                                    <div class="set-val">${set[0] || '-'} KG</div>
+                                    <div class="set-x">✕</div>
+                                    <div class="set-reps">${set[1] || '-'} REPS</div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        content += `<div class="set-row">No set data recorded.</div>`;
+                    }
+                    
+                    content += `</div>`;
+                });
+            } else {
+                content += `<div style="color:#666">No exercises data found.</div>`;
+            }
+
+            container.innerHTML = content;
+        }
+
+    </script>
+</body>
+</html>

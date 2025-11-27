@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Centre | Progress Tracker</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+
+    <style>
+        /* --- SYSTEM VARIABLES (Matching the Hub) --- */
+        :root {
+            --font-display: 'Oswald', sans-serif;
+            --font-body: 'Red Hat Display', sans-serif;
+            
+            --color-bg: #050505;
+            --color-accent: #00e5ff; /* Cyan (Level Up) */
+            --color-accent-glow: rgba(0, 229, 255, 0.4);
+            
+            --color-gold: #FFD700;   /* Prestige */
+            --color-red: #ff3d3d;    /* Streak */
+            --color-purple: #9b59b6; /* Luteal/Grace */
+            
+            --color-white: #ffffff;
+            --color-white-muted: rgba(255, 255, 255, 0.5);
+            
+            --glass-bg: rgba(20, 20, 20, 0.6);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+            --glass-blur: blur(12px);
+            
+            --bg-image: url('https://i.imgur.com/xkHee4y.jpeg'); /* The Hub Background */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            height: 100vh; width: 100vw;
+            background-image: var(--bg-image); 
+            background-size: cover; background-position: center;
+            font-family: var(--font-body); color: var(--color-white); 
+            overflow: hidden;
+            background-color: var(--color-bg);
+        }
+
+        /* Darker overlay for better text contrast */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 0; pointer-events: none;
+        }
+
+        /* --- MAIN CONTAINER --- */
+        .container {
+            position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column;
+            padding: 40px 60px;
+        }
+
+        /* --- HEADER (Aligned with Hub Style) --- */
+        .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+        
+        .header-left { display: flex; align-items: center; gap: 20px; }
+
+        .back-btn { 
+            cursor: pointer; color: var(--color-white-muted); transition: 0.3s; 
+            font-size: 28px !important;
+        }
+        .back-btn:hover { color: var(--color-accent); transform: translateX(-5px); }
+
+        .page-title {
+            font-family: var(--font-display); font-size: 24px; line-height: 1;
+            text-transform: uppercase; letter-spacing: 4px; border-left: 2px solid var(--color-accent);
+            padding-left: 20px;
+        }
+        .page-title span { display: block; font-size: 12px; letter-spacing: 6px; color: var(--color-white-muted); margin-bottom: 5px;}
+
+        /* LOG BUTTON (Premium Outline) */
+        .log-trigger {
+            background: transparent; border: 1px solid rgba(255,255,255,0.3);
+            padding: 12px 30px; font-family: var(--font-display); letter-spacing: 3px;
+            color: var(--color-white); cursor: pointer; transition: all 0.3s ease; 
+            display: flex; align-items: center; gap: 10px;
+            text-transform: uppercase; font-size: 12px;
+        }
+        .log-trigger:hover { 
+            background: var(--color-accent); 
+            color: #000; 
+            border-color: var(--color-accent);
+            box-shadow: 0 0 20px var(--color-accent-glow);
+        }
+
+        /* --- CONTENT GRID --- */
+        .tracker-grid {
+            display: grid; 
+            grid-template-columns: 350px 1fr; 
+            gap: 40px;
+            height: 100%;
+            padding-bottom: 20px;
+            overflow: hidden; /* Contains the scroll inside cols */
+        }
+
+        /* --- GLASS CARDS (The New Skin) --- */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            padding: 30px;
+            display: flex; flex-direction: column;
+            height: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        /* 1. PHOTO COLUMN */
+        .photo-col { justify-content: space-between; }
+        
+        .profile-frame {
+            width: 100%; aspect-ratio: 3/4; /* Consistent Ratio */
+            border: 1px solid rgba(0, 229, 255, 0.2); /* Cyan hint */
+            position: relative; overflow: hidden;
+            background: #000;
+        }
+        
+        /* THE CINEMATIC TRANSITION */
+.profile-slide {
+    position: absolute; top: 0; left: 0; /* Stack them */
+    width: 100%; height: 100%;
+    background-size: cover; background-position: center;
+    
+    opacity: 0; /* Hidden by default */
+    transition: opacity 2.5s ease-in-out; /* Smooth fade */
+    z-index: 0;
+}
+
+/* The active layer is visible */
+.profile-slide.active {
+    opacity: 1;
+    z-index: 1;
+}
+
+/* Hover effect on the container affects the active slide */
+.profile-frame:hover .profile-slide.active { opacity: 1; }
+        
+        .update-photo-btn {
+            font-family: var(--font-body);
+            font-size: 10px; text-transform: uppercase; letter-spacing: 3px;
+            color: var(--color-white-muted); text-align: center;
+            padding: 15px 0; cursor: pointer; border-top: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
+        }
+        .update-photo-btn:hover { color: var(--color-accent); letter-spacing: 5px; }
+
+        /* 2. STATS COLUMN */
+        .stats-col {
+            gap: 30px; overflow-y: auto; 
+        }
+        .stats-col::-webkit-scrollbar { width: 4px; }
+        .stats-col::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        .stats-col::-webkit-scrollbar-thumb { background: var(--color-accent); border-radius: 2px; }
+
+        /* Main Fitness Level Block */
+        .level-top-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; }
+        
+        .level-title { font-family: var(--font-display); font-size: 36px; color: #fff; letter-spacing: 2px; }
+        .level-title span { color: var(--color-accent); }
+        
+        /* PRESTIGE BADGE */
+        .prestige-badge {
+            display: flex; align-items: center; gap: 15px; 
+            padding: 5px 15px; border-right: 2px solid var(--color-gold);
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1));
+        }
+        .p-amount { font-family: var(--font-display); font-size: 24px; color: var(--color-gold); line-height: 1; letter-spacing: 1px; }
+        .p-label { font-size: 9px; color: var(--color-white-muted); letter-spacing: 2px; text-transform: uppercase; }
+
+        .level-sub { font-size: 11px; color: var(--color-white-muted); font-family: var(--font-body); letter-spacing: 2px; text-align: right; margin-top: 8px;}
+
+        /* BARS - CYAN GLOW UP */
+        .big-progress-track {
+            width: 100%; height: 16px; background: rgba(0,0,0,0.6);
+            position: relative; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .big-progress-fill {
+            height: 100%; background: var(--color-accent);
+            width: 0%; position: relative; transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 0 20px var(--color-accent-glow); /* THE GLOW */
+        }
+
+        /* Muscle Group Bars */
+        .muscle-list { display: flex; flex-direction: column; gap: 15px; margin-top: 20px;}
+        
+        .muscle-row { display: grid; grid-template-columns: 140px 1fr 50px; align-items: center; gap: 30px; opacity: 0.8; transition: 0.3s; }
+        .muscle-row:hover { opacity: 1; }
+        
+        .m-label { 
+            font-family: var(--font-display); font-size: 14px; letter-spacing: 1px; 
+            text-transform: uppercase; color: var(--color-white-muted); 
+        }
+        .m-track { width: 100%; height: 4px; background: rgba(255,255,255,0.1); }
+        
+        .m-fill { 
+            height: 100%; background: var(--color-white); width: 0%; 
+            transition: width 0.8s ease; 
+        }
+        /* When active/high level, they turn Cyan */
+        .m-fill.active { background: var(--color-accent); box-shadow: 0 0 10px var(--color-accent-glow); }
+
+        .m-pct { font-size: 11px; color: var(--color-white-muted); text-align: right; font-family: 'Courier New', monospace; }
+        
+        /* Locked/Special State */
+        .muscle-row.locked .m-label { color: var(--color-accent); text-shadow: 0 0 10px var(--color-accent-glow); }
+        .muscle-row.locked .m-fill { background: var(--color-accent); box-shadow: 0 0 10px var(--color-accent-glow); }
+
+        /* --- DRAWER (Dark Mode) --- */
+        .log-drawer {
+            position: fixed; top: 0; right: -500px; width: 500px; height: 100%;
+            background: #050505; border-left: 1px solid var(--color-accent);
+            z-index: 100; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column;
+            box-shadow: -50px 0 100px rgba(0,0,0,0.9);
+        }
+        .log-drawer.open { right: 0; }
+
+        .drawer-header {
+            padding: 40px; border-bottom: 1px solid #1a1a1a;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .drawer-title { font-family: var(--font-display); font-size: 24px; color: var(--color-accent); letter-spacing: 4px; }
+        .close-drawer { cursor: pointer; color: #666; transition: 0.3s; }
+        .close-drawer:hover { color: #fff; }
+
+        .drawer-filters { padding: 20px 40px; display: flex; gap: 15px; border-bottom: 1px solid #1a1a1a; background: #0a0a0a;}
+        .log-input {
+            background: #111; border: 1px solid #333; color: #fff; padding: 12px;
+            font-family: var(--font-body); font-size: 12px; outline: none; flex: 1; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .log-input:focus { border-color: var(--color-accent); color: var(--color-accent); }
+
+        .log-feed {
+            flex: 1; overflow-y: auto; padding: 40px;
+            display: flex; flex-direction: column; gap: 20px;
+            font-family: 'Courier New', monospace; font-size: 11px;
+        }
+        .log-feed::-webkit-scrollbar { width: 4px; }
+        .log-feed::-webkit-scrollbar-thumb { background: #333; }
+
+        .log-item { 
+            color: #888; line-height: 1.4; 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            padding-bottom: 15px; border-left: 2px solid transparent; padding-left: 15px;
+            transition: 0.3s;
+        }
+        .log-item strong { color: var(--color-white); font-weight: 700; }
+        .log-date { display: block; font-size: 9px; opacity: 0.5; margin-top: 6px; text-transform: uppercase; letter-spacing: 2px;}
+
+        /* COLOR CODED LOG TYPES */
+        .log-item.type-prestige { color: var(--color-gold); border-left-color: var(--color-gold); background: linear-gradient(90deg, rgba(255, 215, 0, 0.05), transparent); }
+        .log-item.type-prestige strong { color: var(--color-gold); }
+
+        .log-item.type-milestone { color: var(--color-red); border-left-color: var(--color-red); background: linear-gradient(90deg, rgba(255, 61, 61, 0.05), transparent); }
+        .log-item.type-milestone strong { color: var(--color-red); }
+
+        .log-item.type-bonus { color: var(--color-purple); border-left-color: var(--color-purple); background: linear-gradient(90deg, rgba(155, 89, 182, 0.05), transparent); }
+        .log-item.type-bonus strong { color: var(--color-purple); }
+
+        .log-item.type-levelup { color: var(--color-accent); border-left-color: var(--color-accent); background: linear-gradient(90deg, rgba(0, 229, 255, 0.05), transparent); }
+        .log-item.type-levelup strong { color: var(--color-accent); }
+
+        /* --- MODAL: PHOTO MANAGER (UPDATED FOR 20 SLOTS) --- */
+        .modal-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.9); z-index: 200; justify-content: center; align-items: center; backdrop-filter: blur(5px);
+        }
+        .modal-box { 
+            background: #0a0a0a; width: 500px; padding: 40px; 
+            border: 1px solid var(--color-accent); box-shadow: 0 0 60px rgba(0, 229, 255, 0.15);
+            /* NEW SCROLL CAPABILITY */
+            max-height: 85vh; overflow-y: auto;
+        }
+        .modal-box::-webkit-scrollbar { width: 4px; }
+        .modal-box::-webkit-scrollbar-thumb { background: var(--color-accent); }
+
+        .modal-title { font-family: var(--font-display); font-size: 24px; color: #fff; letter-spacing: 2px; margin-bottom: 20px; }
+        .url-input { 
+            width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 15px; 
+            margin-bottom: 10px; font-family: var(--font-body); font-size: 12px; outline: none;
+        }
+        .url-input:focus { border-color: var(--color-accent); }
+        .btn-save { 
+            width: 100%; background: var(--color-accent); color: #000; padding: 15px; 
+            font-weight: 700; letter-spacing: 3px; text-transform: uppercase; border: none; cursor: pointer; margin-top: 10px; 
+        }
+        .btn-save:hover { background: #fff; }
+        .btn-cancel { 
+            text-align: center; color: #666; font-size: 10px; letter-spacing: 2px; margin-top: 15px; cursor: pointer; 
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="overlay"></div>
+
+    <div class="container">
+        <div class="top-bar">
+            <div class="header-left">
+                <span class="material-symbols-outlined back-btn" onclick="window.location.href='FITNESS-CENTRE.html'">arrow_back</span>
+                <div class="page-title">
+                    <span>FITNESS CENTRE</span>
+                    PROGRESS TRACKER
+                </div>
+            </div>
+            
+            <button class="log-trigger" onclick="toggleLog()">
+                VIEW LOG <span class="material-symbols-outlined" style="font-size:18px;">history</span>
+            </button>
+        </div>
+
+        <div class="tracker-grid">
+
+            <div class="glass-card photo-col">
+                <div class="profile-frame">
+    <div class="profile-slide active" id="slideLayer1"></div>
+    <div class="profile-slide" id="slideLayer2"></div>
+</div>
+                <div class="update-photo-btn" onclick="openPhotoModal()">UPDATE PROFILE IMAGE</div>
+            </div>
+
+            <div class="glass-card stats-col">
+                
+                <div class="main-level-block">
+                    <div class="level-top-row">
+                        <div class="level-title">LEVEL <span id="mainLevelNum">1</span></div>
+                        
+                        <div class="prestige-badge">
+                            <div style="text-align:right">
+                                <div class="p-amount" id="prestigeDisplay">0</div>
+                                <div class="p-label">PRESTIGE</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="big-progress-track">
+                        <div class="big-progress-fill" id="mainBar" style="width: 0%"></div>
+                    </div>
+                    <div class="level-sub" id="mainLevelSub">0 / 100 FP</div>
+                </div>
+
+                <div class="muscle-list" id="muscleContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="log-drawer" id="logDrawer">
+        <div class="drawer-header">
+            <span class="drawer-title">LEVELING LOG</span>
+            <span class="material-symbols-outlined close-drawer" onclick="toggleLog()">close</span>
+        </div>
+        <div class="drawer-filters">
+            <input type="text" class="log-input" placeholder="SEARCH LOGS..." id="logSearch" onkeyup="filterLogs()">
+            <input type="date" class="log-input" style="width: 140px;" id="logDate" onchange="filterLogs()">
+        </div>
+        <div class="log-feed" id="logFeed">
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="photoModal">
+        <div class="modal-box">
+            <div class="modal-title">MANAGE PHOTOS (MAX 20)</div>
+            <div style="margin-bottom: 20px; font-size: 12px; color: #888;">Paste direct image links (Imgur, etc). Empty lines are ignored.</div>
+            <div id="photoInputsList"></div> <button class="btn-save" onclick="savePhotos()">SAVE GALLERY</button>
+            <div class="btn-cancel" onclick="closePhotoModal()">CANCEL</div>
+        </div>
+    </div>
+
+    <script src="js/core.js"></script>
+
+    <script>
+        const DISPLAY_ORDER = [
+            "Shoulders", "Chest", "Back", "Biceps", "Triceps", "Forearms",
+            "Abs", "Obliques", "Hip Flexors", "Glutes", "Quads", "Hamstrings", 
+            "Calf", "Full Body", "Cardio"
+        ];
+
+        let currentSlideIdx = 0;
+        let slideInterval = null;
+        let profileImages = [];
+
+        window.onload = function() {
+            if (typeof UserProfile === 'undefined') { console.error("Core.js missing"); return; }
+            
+            // Load Saved Photos
+            profileImages = UserProfile.profileSlides || ["https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop"];
+            
+            renderMainLevel();
+            renderMuscleGrid();
+            renderSystemLog();
+            startSlideshow();
+        };
+
+        function toggleLog() { document.getElementById('logDrawer').classList.toggle('open'); }
+
+        /* --- SLIDESHOW LOGIC --- */
+        function startSlideshow() {
+    if (profileImages.length === 0) return;
+
+    const layer1 = document.getElementById('slideLayer1');
+    const layer2 = document.getElementById('slideLayer2');
+    
+    // Track which layer is currently visible
+    let isLayer1Active = true;
+
+    // 1. Set the initial random image immediately on Layer 1
+    let currentIdx = Math.floor(Math.random() * profileImages.length);
+    layer1.style.backgroundImage = `url('${profileImages[currentIdx]}')`;
+
+    // Only start the timer if we have more than 1 photo
+    if (profileImages.length > 1) {
+        if (slideInterval) clearInterval(slideInterval);
+        
+        slideInterval = setInterval(() => {
+            // 2. Pick a new random image
+            let nextIdx = Math.floor(Math.random() * profileImages.length);
+            
+            // 3. Determine which layer is 'hidden' right now
+            const hiddenLayer = isLayer1Active ? layer2 : layer1;
+            const visibleLayer = isLayer1Active ? layer1 : layer2;
+
+            // 4. Load the new image onto the hidden layer
+            hiddenLayer.style.backgroundImage = `url('${profileImages[nextIdx]}')`;
+
+            // 5. Cross-fade: Reveal the hidden layer, hide the visible one
+            hiddenLayer.classList.add('active');
+            visibleLayer.classList.remove('active');
+
+            // 6. Flip the toggle for next time
+            isLayer1Active = !isLayer1Active;
+
+        }, 12000); // 12 Seconds Hold
+    }
+}
+
+        /* --- PHOTO MANAGER (20 SLOTS) --- */
+        function openPhotoModal() {
+            const container = document.getElementById('photoInputsList');
+            container.innerHTML = ''; 
+
+            // Generate 20 Inputs Dynamically
+            for(let i=0; i<20; i++) {
+                const val = profileImages[i] || "";
+                const input = document.createElement('input');
+                input.type = "text";
+                input.className = "url-input";
+                input.id = `url${i+1}`;
+                input.placeholder = `Image URL ${i+1}`;
+                input.value = val;
+                container.appendChild(input);
+            }
+            document.getElementById('photoModal').style.display = 'flex';
+        }
+
+        function closePhotoModal() { document.getElementById('photoModal').style.display = 'none'; }
+
+        function savePhotos() {
+            const newUrls = [];
+            for(let i=1; i<=20; i++) {
+                const el = document.getElementById(`url${i}`);
+                if(el && el.value.trim()) newUrls.push(el.value.trim());
+            }
+
+            if(newUrls.length === 0) {
+                newUrls.push("https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=2070&auto=format&fit=crop");
+            }
+
+            UserProfile.profileSlides = newUrls;
+            profileImages = newUrls;
+            saveSystemData(); 
+            
+            closePhotoModal();
+            currentSlideIdx = 0;
+            startSlideshow();
+        }
+
+        /* --- RENDERERS --- */
+        function renderMainLevel() {
+            const currentFP = UserProfile.fitnessPoints;
+            const stats = getLevelStatus(currentFP, FITNESS_LEVELS, true); 
+
+            document.getElementById('mainLevelNum').innerText = stats.level;
+            document.getElementById('mainLevelSub').innerText = `${stats.currentPoints} / ${stats.nextReq} FP`;
+            
+            const bar = document.getElementById('mainBar');
+            bar.style.width = `${stats.pct}%`;
+
+            if (stats.isCapped) {
+                bar.style.backgroundColor = "var(--color-accent)";
+                bar.style.boxShadow = "0 0 20px var(--color-accent-glow)";
+                document.getElementById('mainLevelSub').innerHTML = `<span style="color:var(--color-accent)">⚠ GATEKEEPER LOCKED (XP BANKING ACTIVE)</span>`;
+            }
+
+            document.getElementById('prestigeDisplay').innerText = UserProfile.prestigeCurrency.toLocaleString();
+        }
+
+        function renderMuscleGrid() {
+            const container = document.getElementById('muscleContainer');
+            container.innerHTML = ''; 
+
+            DISPLAY_ORDER.forEach(muscle => {
+                const mData = UserProfile.muscles[muscle] || { xp: 0, level: 1 };
+                const stats = getLevelStatus(mData.xp, MUSCLE_LEVELS);
+                
+                let isGatekeeper = false;
+                const nextFitTier = FITNESS_LEVELS.find(t => t.lvl === UserProfile.fitnessLevel + 1);
+                if (nextFitTier && nextFitTier.gate && nextFitTier.gate.muscle === muscle) {
+                    isGatekeeper = true;
+                }
+
+                const row = document.createElement('div');
+                row.className = `muscle-row ${isGatekeeper ? 'locked' : ''}`;
+                const crown = stats.level >= 10 ? '👑' : '';
+                const activeClass = stats.pct > 0 ? 'active' : '';
+
+                row.innerHTML = `
+                    <div class="m-label">
+                        ${muscle} <span style="font-size:10px; color:rgba(255,255,255,0.3); margin-left:5px">LVL ${stats.level}</span> ${crown}
+                    </div>
+                    <div class="m-track">
+                        <div class="m-fill ${activeClass}" style="width: ${stats.pct}%"></div>
+                    </div>
+                    <div class="m-pct">${stats.pct}%</div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function renderSystemLog() {
+            const container = document.getElementById('logFeed');
+            container.innerHTML = '';
+            let logs = UserProfile.systemLogs || [];
+            logs = [...logs].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const searchVal = document.getElementById('logSearch').value.toLowerCase();
+            const dateVal = document.getElementById('logDate').value;
+
+            logs = logs.filter(log => {
+                const matchesText = log.text.toLowerCase().includes(searchVal);
+                let matchesDate = true;
+                if (dateVal) {
+                    const logISO = new Date(log.date).toISOString().split('T')[0];
+                    matchesDate = (logISO === dateVal);
+                }
+                return matchesText && matchesDate;
+            });
+
+            if(logs.length === 0) {
+                 container.innerHTML = `<div class="log-item">SYSTEM IDLE. NO RECORDS YET.</div>`;
+                 return;
+            }
+
+            logs.forEach(log => {
+                const dateObj = new Date(log.date);
+                const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
+                const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                
+                const div = document.createElement('div');
+                let typeClass = '';
+                if (log.type === 'prestige') typeClass = 'type-prestige'; 
+                else if (log.type === 'levelup') typeClass = 'type-levelup'; 
+                else if (log.type === 'milestone') typeClass = 'type-milestone'; 
+                else if (log.type === 'bonus' || log.type === 'grace') typeClass = 'type-bonus'; 
+                
+                div.className = `log-item ${typeClass}`;
+                div.innerHTML = `
+                    <strong>${log.text}</strong>
+                    <span class="log-date">${dateStr} • ${timeStr}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function filterLogs() { renderSystemLog(); }
+
+    </script>
+
+</body>
+</html>

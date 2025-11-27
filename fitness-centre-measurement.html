@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Centre | Measurements</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+    <script src="js/core.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* --- SYSTEM VISUALS (HUD V2) --- */
+        :root {
+            --font-header: 'Oswald', sans-serif;
+            --font-body: 'Red Hat Display', sans-serif;
+            
+            --color-accent: #00e5ff; /* Cyan */
+            --color-accent-dim: rgba(0, 229, 255, 0.1);
+            --color-gold: #FFD700;   /* Kept for Goals */
+            
+            --color-green: #00ff9d;
+            --color-red: #ff3d3d;
+            
+            --color-white: #ffffff;
+            --color-white-muted: rgba(255, 255, 255, 0.6);
+            
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            --glass-blur: blur(15px);
+
+            --bg-image: url('https://i.imgur.com/SaN2L7T.jpeg'); 
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            height: 100vh; width: 100vw; overflow: hidden;
+            background-image: var(--bg-image); 
+            background-size: cover; 
+            background-position: center;
+            font-family: var(--font-body); 
+            color: var(--color-white);
+            background-color: #111;
+        }
+
+        /* Heavy overlay for contrast */
+        body::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 8, 10, 0.85); 
+            backdrop-filter: blur(2px);
+            z-index: -1;
+        }
+
+        /* --- DASHBOARD CONTAINER --- */
+        .dashboard {
+            width: 100%; max-width: 1200px; height: 95vh; 
+            display: flex; flex-direction: column; gap: 25px; 
+            position: relative; margin: 0 auto; padding: 0 20px;
+        }
+
+        /* HEADER */
+        .header-bar {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            padding-bottom: 20px; border-bottom: var(--glass-border);
+        }
+        .title-group { display: flex; align-items: center; gap: 20px; }
+        
+        .back-btn { 
+            font-size: 32px !important; cursor: pointer; color: var(--color-white-muted); transition: 0.3s; 
+        }
+        .back-btn:hover { color: var(--color-accent); transform: translateX(-5px); }
+        
+        h1 { 
+            font-family: var(--font-header); font-size: 48px; 
+            text-transform: uppercase; letter-spacing: 5px; margin: 0; 
+            color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.9);
+        }
+
+        .key-stats { display: flex; gap: 50px; }
+        .stat-pill { text-align: right; cursor: pointer; transition: 0.3s; }
+        .stat-pill:hover .stat-val { text-shadow: 0 0 15px var(--color-accent-dim); }
+        
+        .stat-label { 
+            font-size: 11px; color: var(--color-accent); 
+            text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; 
+        }
+        .stat-val { 
+            font-size: 32px; font-weight: 500; color: var(--color-white); 
+            font-family: var(--font-header); line-height: 1;
+        }
+        .bmi-good { color: var(--color-green); text-shadow: 0 0 10px rgba(0, 255, 157, 0.3); }
+
+        /* CHART PANEL */
+        .chart-panel {
+            width: 100%; height: 280px;
+            background: var(--glass-bg); 
+            border: var(--glass-border);
+            border-radius: 0; /* Sharp corners for tech feel */
+            padding: 20px 30px;
+            display: flex; flex-direction: column;
+            position: relative;
+        }
+        /* Decorative corner accents */
+        .chart-panel::after {
+            content: ''; position: absolute; top: 0; right: 0; width: 20px; height: 20px;
+            border-top: 2px solid var(--color-accent); border-right: 2px solid var(--color-accent);
+        }
+
+        .chart-header {
+            font-family: var(--font-header); color: var(--color-white-muted); font-size: 14px;
+            text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px;
+            display: flex; justify-content: space-between;
+        }
+        .chart-container { flex: 1; position: relative; width: 100%; }
+
+        /* GRID */
+        .grid-wrapper { 
+            flex: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 20px; 
+        }
+        .grid-wrapper::-webkit-scrollbar { width: 4px; }
+        .grid-wrapper::-webkit-scrollbar-thumb { background: var(--color-accent); }
+
+        .measurements-table { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; }
+        
+        .m-card {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 25px; 
+            background: rgba(0,0,0,0.3); /* Darker for contrast */
+            border: var(--glass-border);
+            transition: 0.3s; cursor: pointer;
+        }
+        .m-card:hover { 
+            background: rgba(255,255,255,0.05); 
+            border-color: var(--color-white-muted);
+        }
+        .m-card.active {
+            border-color: var(--color-accent); 
+            background: var(--color-accent-dim);
+            box-shadow: 0 0 20px var(--color-accent-dim);
+        }
+        
+        .m-name { font-size: 12px; color: var(--color-white-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+        .m-data { display: flex; align-items: center; gap: 15px; }
+        .m-num { font-family: var(--font-header); font-size: 22px; color: var(--color-white); }
+        
+        .arrow-icon { font-size: 18px !important; }
+        .up-good { color: var(--color-green); transform: rotate(-45deg); filter: drop-shadow(0 0 5px var(--color-green)); }
+        .down-bad { color: var(--color-red); transform: rotate(45deg); filter: drop-shadow(0 0 5px var(--color-red)); }
+        .neutral { color: #444; }
+
+        /* ACTIONS & FAB */
+        .fab-stack {
+            position: absolute; bottom: 20px; right: 0;
+            display: flex; flex-direction: column; gap: 20px; z-index: 10;
+        }
+        .fab {
+            width: 50px; height: 50px; 
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--color-white-muted); 
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.3s; 
+            backdrop-filter: blur(5px);
+        }
+        .fab:hover { 
+            border-color: var(--color-accent); 
+            color: var(--color-accent); 
+            box-shadow: 0 0 15px var(--color-accent-dim);
+            transform: translateX(-5px);
+        }
+        .fab span { color: var(--color-white); font-size: 24px; transition: 0.3s; }
+        .fab:hover span { color: var(--color-accent); }
+
+        /* Crown Special */
+        .fab.crown { border-color: var(--color-gold); }
+        .fab.crown span { color: var(--color-gold); }
+        .fab.crown:hover { box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); color: var(--color-gold); }
+
+        .update-text {
+            position: absolute; bottom: 5px; left: 0; 
+            font-size: 10px; color: var(--color-white-muted); 
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        /* --- MODALS (GLASS) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+            z-index: 100; display: none; justify-content: center; align-items: center;
+        }
+        .modal-overlay.open { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-box {
+            background: #0a0a0a; 
+            border: 1px solid var(--color-accent);
+            padding: 40px; width: 500px; max-height: 80vh; 
+            box-shadow: 0 0 50px rgba(0, 229, 255, 0.1); 
+            position: relative; display: flex; flex-direction: column;
+        }
+        
+        .modal-header {
+            font-family: var(--font-header); font-size: 24px; color: var(--color-white);
+            margin-bottom: 30px; text-transform: uppercase; letter-spacing: 3px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;
+        }
+        .close-modal { cursor: pointer; color: var(--color-white-muted); transition: 0.3s; }
+        .close-modal:hover { color: var(--color-red); }
+        
+        .modal-scroll {
+            flex: 1; overflow-y: auto; padding-right: 10px;
+            margin-bottom: 30px;
+        }
+        .modal-scroll::-webkit-scrollbar { width: 4px; }
+        .modal-scroll::-webkit-scrollbar-thumb { background: var(--color-accent); }
+
+        .input-group { margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .input-group label { font-size: 12px; color: var(--color-accent); letter-spacing: 1px; text-transform: uppercase; }
+        
+        .input-field {
+            width: 120px; background: rgba(255,255,255,0.05); 
+            border: 1px solid rgba(255,255,255,0.1); color: #fff;
+            padding: 10px; font-family: var(--font-body); text-align: right;
+            font-size: 14px; transition: 0.3s;
+        }
+        .input-field:focus { border-color: var(--color-accent); outline: none; background: rgba(0, 229, 255, 0.05); }
+
+        .modal-btn {
+            width: 100%; padding: 15px; 
+            background: var(--color-accent); border: none; color: #000;
+            font-family: var(--font-body); letter-spacing: 3px; font-weight: 700;
+            text-transform: uppercase; cursor: pointer; transition: 0.3s;
+        }
+        .modal-btn:hover { box-shadow: 0 0 20px var(--color-accent-dim); background: #fff; }
+
+        /* Compare Filter Styling */
+        .compare-filter {
+            background: #000; border: 1px solid var(--color-white-muted); color: #fff;
+            padding: 5px 10px; font-family: var(--font-body);
+            font-size: 12px; outline: none;
+        }
+
+        .history-row {
+            display: flex; justify-content: space-between; padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px;
+        }
+        .diff-val { font-weight: 700; font-family: var(--font-header); letter-spacing: 1px;}
+        .diff-green { color: var(--color-green); text-shadow: 0 0 10px rgba(0,255,157,0.3); }
+        .diff-red { color: var(--color-red); text-shadow: 0 0 10px rgba(255,61,61,0.3); }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <div class="header-bar">
+            <div class="title-group">
+                <span class="material-symbols-outlined back-btn" onclick="window.location.href='FITNESS-CENTRE.html'">keyboard_backspace</span>
+                <h1>Measurements</h1>
+            </div>
+            <div class="key-stats">
+                <div class="stat-pill" onclick="switchChart('Weight', 'Weight Monitor')">
+                    <div class="stat-label">Weight</div>
+                    <div class="stat-val"><span id="weightDisplay">--</span><span style="font-size:14px; margin-left:5px; color:#888">kg</span></div>
+                </div>
+                <div class="stat-pill">
+                    <div class="stat-label">Height</div>
+                    <div class="stat-val">160<span style="font-size:14px; margin-left:5px; color:#888">cm</span></div>
+                </div>
+                <div class="stat-pill">
+                    <div class="stat-label">BMI</div>
+                    <div class="stat-val bmi-good" id="bmiDisplay">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-panel">
+            <div class="chart-header">
+                <span id="chartTitle">WEIGHT MONITOR</span>
+                <span id="chartGoalLabel" style="color: var(--color-gold); font-size: 12px; letter-spacing: 1px;">GOAL: --</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="mainChart"></canvas>
+            </div>
+        </div>
+
+        <div class="grid-wrapper">
+            <div class="measurements-table" id="mGrid"></div>
+        </div>
+
+        <div class="update-text" id="lastUpdateTxt">System Status: Ready</div>
+
+        <div class="fab-stack">
+            <div class="fab crown" onclick="openDynamicModal('goal')" title="Set Goals"><span class="material-symbols-outlined">emoji_events</span></div>
+            <div class="fab" onclick="openDynamicModal('record')" title="Add Record"><span class="material-symbols-outlined">add</span></div>
+            <div class="fab" onclick="openCompareModal()" title="Compare"><span class="material-symbols-outlined">compare_arrows</span></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="dynamicModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span id="modalTitle">Title</span>
+                <span class="material-symbols-outlined close-modal" onclick="closeModal('dynamicModal')">close</span>
+            </div>
+            
+            <div class="modal-scroll" id="modalFormContainer"></div>
+            <button class="modal-btn" id="modalActionBtn" onclick="">SAVE DATA</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span>Compare vs.</span>
+                <select id="compareDateSelect" class="compare-filter" onchange="renderHistory()">
+                    </select>
+                <span class="material-symbols-outlined close-modal" onclick="closeModal('historyModal')">close</span>
+            </div>
+            <div class="modal-scroll" id="historyContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIG ---
+        const CHART_LIMIT = 7; // Keep chart clean (Last 7 entries)
+        const bodyParts = [
+            "Weight", "Shoulders", "Chest", "Left Bicep", "Right Bicep", 
+            "Left Forearm", "Right Forearm", "Upper Abs", "Waist", "Lower Abs", 
+            "Hips", "Left Thigh", "Right Thigh", "Left Calf", "Right Calf"
+        ];
+
+        // --- DB STRUCTURE (Matches Core.js format) ---
+        // historyLogs handled by core.js (simulated if missing for UI check)
+        if (typeof historyLogs === 'undefined') {
+             console.warn("Core.js not found. Initializing empty structure.");
+             window.historyLogs = [{ date: "Init", data: {} }]; 
+             window.goals = {};
+        }
+
+        // Goals
+        let activeCategory = 'Weight'; 
+        let myChart;
+
+        // --- INIT ---
+        window.onload = function() {
+            initChart();
+            renderGrid();
+            updateHeaderStats();
+        };
+
+        // --- HELPERS ---
+        function getCurrentLog() { return historyLogs[historyLogs.length - 1]; }
+        function getPreviousLog() { return historyLogs.length > 1 ? historyLogs[historyLogs.length - 2] : getCurrentLog(); }
+        
+        // --- RENDER GRID ---
+        function renderGrid() {
+            const container = document.getElementById('mGrid');
+            container.innerHTML = '';
+            const current = getCurrentLog().data;
+            const previous = getPreviousLog().data;
+
+            bodyParts.forEach(part => {
+                if(part === "Weight") return; 
+
+                const val = current[part] || 0;
+                const prevVal = previous[part] || 0;
+                const goal = goals[part];
+                
+                // Arrow Logic
+                let arrowHtml = '<span class="material-symbols-outlined arrow-icon neutral">horizontal_rule</span>';
+                if (goal && val > 0) {
+                    const distCurrent = Math.abs(goal - val);
+                    const distPrev = Math.abs(goal - prevVal);
+                    
+                    if (distCurrent < distPrev) arrowHtml = '<span class="material-symbols-outlined arrow-icon up-good">arrow_upward</span>';
+                    else if (distCurrent > distPrev) arrowHtml = '<span class="material-symbols-outlined arrow-icon down-bad">arrow_downward</span>';
+                }
+
+                const activeClass = activeCategory === part ? 'active' : '';
+                container.innerHTML += `
+                    <div class="m-card ${activeClass}" onclick="switchChart('${part}')">
+                        <div class="m-name">${part}</div>
+                        <div class="m-data">
+                            <span class="m-num">${val} <span style="font-size:12px; color:#666">cm</span></span>
+                            ${arrowHtml}
+                        </div>
+                    </div>`;
+            });
+        }
+
+        // --- CHART (UPDATED COLORS FOR NEW THEME) ---
+        function initChart() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            // Updated Gradient to Cyan
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(0, 229, 255, 0.2)'); 
+            gradient.addColorStop(1, 'rgba(0, 229, 255, 0.0)');
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [], 
+                    datasets: [
+                        {
+                            label: 'Progress',
+                            data: [],
+                            borderColor: '#00e5ff', // SYSTEM CYAN
+                            borderWidth: 2,
+                            backgroundColor: gradient,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#000',
+                            pointBorderColor: '#00e5ff'
+                        },
+                        {
+                            label: 'Goal',
+                            data: [], 
+                            borderColor: '#FFD700', // SYSTEM GOLD
+                            borderWidth: 1,
+                            borderDash: [5, 5], 
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { display: false }, 
+                        x: { 
+                            grid: { color: 'rgba(255,255,255,0.05)' }, 
+                            ticks: { color: '#666', font: {family: 'Red Hat Display'} } 
+                        } 
+                    }
+                }
+            });
+            switchChart('Weight'); // Load initial data
+        }
+
+        function switchChart(part) {
+            activeCategory = part;
+            document.getElementById('chartTitle').innerText = part.toUpperCase() + " MONITOR";
+            const g = goals[part];
+            document.getElementById('chartGoalLabel').innerText = g ? `GOAL: ${g}` : "GOAL: --";
+
+            // Slice Data for Limit (Last N entries)
+            const slicedLogs = historyLogs.slice(-CHART_LIMIT);
+            const labels = slicedLogs.map(log => log.date);
+            const data = slicedLogs.map(log => log.data[part] || 0);
+
+            myChart.data.labels = labels;
+            myChart.data.datasets[0].data = data;
+            myChart.data.datasets[1].data = Array(labels.length).fill(g || null);
+            myChart.update();
+
+            renderGrid(); // Updates highlights
+            updateHeaderStats();
+        }
+
+function updateHeaderStats() {
+    const currentLog = getCurrentLog();
+    // Default to 0 if weight isn't found
+    const w = currentLog.data["Weight"] || 0;
+    
+    document.getElementById('weightDisplay').innerText = w;
+    
+    // Calculate BMI
+    const bmi = w > 0 ? (w / ((1.6) ** 2)).toFixed(1) : 0;
+    document.getElementById('bmiDisplay').innerText = bmi;
+
+    // NEW LINE: This runs the time calculator we just added
+    document.getElementById('lastUpdateTxt').innerText = getTimeAgo(currentLog.date);
+}
+
+        // --- DYNAMIC MODALS ---
+        function openDynamicModal(type) {
+            const modal = document.getElementById('dynamicModal');
+            const title = document.getElementById('modalTitle');
+            const container = document.getElementById('modalFormContainer');
+            const btn = document.getElementById('modalActionBtn');
+            
+            container.innerHTML = ''; 
+
+            if (type === 'goal') {
+                title.innerText = "SET TARGETS";
+                title.style.color = "#FFD700";
+                btn.innerText = "SAVE TARGETS";
+                btn.style.background = "#FFD700"; // Gold Button for Gold Goals
+                btn.style.color = "#000";
+                btn.onclick = function() { saveBatch('goal'); };
+                
+                bodyParts.forEach(part => {
+                    const currentGoal = goals[part] || '';
+                    container.innerHTML += `
+                        <div class="input-group">
+                            <label>${part}</label>
+                            <input type="number" id="input_${part}" class="input-field" value="${currentGoal}" placeholder="--">
+                        </div>`;
+                });
+            } else {
+                title.innerText = "NEW RECORD";
+                title.style.color = "#00e5ff";
+                btn.innerText = "UPDATE SYSTEM";
+                btn.style.background = "#00e5ff"; 
+                btn.style.color = "#000";
+                btn.onclick = function() { saveBatch('record'); };
+
+                bodyParts.forEach(part => {
+                    container.innerHTML += `
+                        <div class="input-group">
+                            <label>${part}</label>
+                            <input type="number" id="input_${part}" class="input-field" placeholder="Optional">
+                        </div>`;
+                });
+            }
+            modal.classList.add('open');
+        }
+
+        function saveBatch(type) {
+    if (type === 'record') {
+        // CHANGE: We now save the ISO String for accurate timing
+        const newEntry = { date: new Date().toISOString(), data: { ...getCurrentLog().data } }; 
+        let hasUpdate = false;
+
+        bodyParts.forEach(part => {
+            const val = document.getElementById(`input_${part}`).value;
+            if (val) {
+                newEntry.data[part] = parseFloat(val);
+                hasUpdate = true;
+            }
+        });
+
+        if(hasUpdate) {
+            historyLogs.push(newEntry);
+            saveSystemData();
+            updateHeaderStats(); // Force the label to update immediately
+        }
+    } else {
+        bodyParts.forEach(part => {
+            const val = document.getElementById(`input_${part}`).value;
+            if (val) goals[part] = parseFloat(val);
+        });
+        saveSystemData();
+    }
+    closeModal('dynamicModal');
+    switchChart(activeCategory);
+}
+
+        // --- COMPARE MODAL ---
+        function openCompareModal() {
+            // Populate Dropdown with Dates (excluding current)
+            const select = document.getElementById('compareDateSelect');
+            select.innerHTML = '';
+            
+            // Add all past dates
+            historyLogs.slice(0, -1).forEach((log, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.text = log.date;
+                select.appendChild(option);
+            });
+            
+            // Select the most recent past log by default
+            select.selectedIndex = select.options.length - 1;
+            
+            renderHistory();
+            document.getElementById('historyModal').classList.add('open');
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyContent');
+            container.innerHTML = '';
+            
+            const selectedIndex = document.getElementById('compareDateSelect').value;
+            if(!historyLogs[selectedIndex]) return; 
+
+            const compareLog = historyLogs[selectedIndex];
+            const currentLog = getCurrentLog();
+
+            bodyParts.forEach(part => {
+                const curr = currentLog.data[part] || 0;
+                const old = compareLog.data[part] || 0;
+                const diff = (curr - old).toFixed(1);
+                
+                let colorClass = "diff-val";
+                if(diff < 0) colorClass += " diff-green"; 
+                if(diff > 0) colorClass += " diff-red"; 
+
+                container.innerHTML += `
+                    <div class="history-row">
+                        <span style="color:#888; font-size:12px; text-transform:uppercase">${part}</span>
+                        <span style="color:#ccc">${old} → ${curr}</span>
+                        <span class="${colorClass}">${diff > 0 ? '+' : ''}${diff}</span>
+                    </div>`;
+            });
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// --- NEW TOOL: TIME CALCULATOR ---
+function getTimeAgo(dateString) {
+    if (!dateString || dateString === "Init") return "SYSTEM STATUS: READY";
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) return "SYSTEM STATUS: STANDBY";
+
+    const seconds = Math.round((now - date) / 1000);
+    const minutes = Math.round(seconds / 60);
+    const hours = Math.round(minutes / 60);
+    const days = Math.round(hours / 24);
+
+    if (seconds < 60) return `UPDATED: JUST NOW`;
+    else if (minutes < 60) return `UPDATED: ${minutes} MIN AGO`;
+    else if (hours < 24) return `UPDATED: ${hours} HR AGO`;
+    else return `UPDATED: ${days} DAY${days > 1 ? 'S' : ''} AGO`;
+}
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeHub | Fitness Centre</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+
+    <style>
+        /* --- CORE VARIABLES --- */
+        :root {
+            --font-display: 'Oswald', sans-serif; 
+            --font-body: 'Red Hat Display', sans-serif; 
+            --font-serif: 'Cambria', serif; 
+            
+            --color-white: #ffffff;
+            --color-white-muted: rgba(255, 255, 255, 0.7);
+            --color-accent-blue: #00e5ff; 
+            --color-gold: #FFD700;
+            --color-grace: #d63384;
+            
+            --glass-border: 1px solid rgba(255, 255, 255, 0.15);
+            --bg-image: url('https://i.imgur.com/xkHee4y.jpeg');
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            font-family: var(--font-body);
+            background-color: #1a1a1a; 
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.3); 
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* --- TOP NAVIGATION --- */
+        .top-nav {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            padding: 40px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 10;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--color-white);
+            opacity: 0.9;
+            transition: opacity 0.3s;
+        }
+        .nav-left:hover { opacity: 1; }
+
+        .exit-btn {
+            cursor: pointer;
+            font-size: 28px !important;
+            font-weight: 300;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .brand-text {
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 1;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex;
+            flex-direction: column;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 35px; 
+        }
+        .logo-img {
+            width: 140px; 
+            opacity: 0.9;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
+        }
+
+        .nav-right {
+            display: flex;
+            color: var(--color-white);
+            margin-right: 50px; 
+        }
+        .icon-btn {
+            cursor: pointer;
+            font-size: 28px !important;
+            font-weight: 300;
+            opacity: 0.7;
+            transition: all 0.3s;
+        }
+        .icon-btn:hover { opacity: 1; transform: translateY(-2px); }
+
+        /* --- CENTER STAGE --- */
+        .center-stage {
+            position: absolute;
+            top: 50%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 5;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        /* --- QUOTATION STYLES --- */
+        .fade-text {
+            transition: opacity 0.8s ease, filter 0.8s ease;
+            opacity: 1;
+            filter: blur(0);
+        }
+        .fade-text.hidden {
+            opacity: 0;
+            filter: blur(8px); 
+        }
+
+        .quote-upper {
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 4px; 
+            text-transform: uppercase;
+            color: var(--color-white-muted);
+            margin-bottom: 20px; 
+            cursor: help; 
+        }
+
+        .main-title {
+            font-family: var(--font-display);
+            font-size: 100px; 
+            font-weight: 700;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.9); 
+            text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 40px;
+            letter-spacing: 15px; 
+            transition: all 0.5s ease;
+        }
+        .main-title:hover {
+            color: white;
+            text-shadow: 0 0 30px rgba(255,255,255,0.3);
+        }
+
+        /* --- BUTTONS --- */
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .action-btn {
+            border: var(--glass-border);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px); 
+            color: var(--color-white);
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 3px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.4s ease;
+            padding: 20px 60px;
+            min-width: 300px;
+        }
+
+        .btn-start {
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+        .btn-start:hover {
+            background: rgba(255, 255, 255, 0.9);
+            color: #000;
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+        }
+
+        /* THE SIGNAL */
+        .btn-start.mission-ready:hover {
+            background: var(--color-accent-blue); 
+            color: #000;
+            border-color: var(--color-accent-blue);
+            box-shadow: 0 0 40px var(--color-accent-blue); 
+            text-shadow: none;
+        }
+
+        .btn-dashboard {
+            border: none;
+            font-size: 12px;
+            opacity: 0.7;
+            background: transparent;
+            backdrop-filter: none;
+        }
+        .btn-dashboard:hover {
+            opacity: 1;
+            letter-spacing: 5px; 
+        }
+
+        /* --- BOTTOM AREA --- */
+        .bottom-area {
+            position: absolute;
+            bottom: 60px; 
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .quote-line {
+            width: 60px;
+            height: 1px;
+            background: var(--color-white-muted);
+            margin-bottom: 20px;
+        }
+
+        .quote-lower {
+            font-family: var(--font-serif); 
+            font-size: 14px;
+            color: var(--color-white-muted);
+            font-style: italic; 
+            letter-spacing: 1px;
+            cursor: help; 
+        }
+
+        /* --- SIDE DOCK --- */
+        .right-dock {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%); 
+            display: flex;
+            flex-direction: column;
+            gap: 45px; 
+            z-index: 20;
+        }
+
+        .dock-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.85); 
+        }
+
+        .dock-icon {
+            font-size: 24px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: rgba(255, 255, 255, 0.8); 
+        }
+
+        .dock-label {
+            font-family: var(--font-body);
+            font-weight: 300;     
+            font-size: 11px;
+            letter-spacing: 4px;  
+            text-transform: uppercase;
+            writing-mode: vertical-rl; 
+            text-orientation: mixed;
+            transform: rotate(180deg); 
+            transition: all 0.3s ease;
+        }
+
+        .dock-item:hover .dock-icon {
+            color: var(--color-accent-blue);
+            filter: drop-shadow(0 0 10px var(--color-accent-blue));
+            transform: scale(1.1) translateY(-2px); 
+        }
+
+        .dock-item:hover .dock-label {
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+
+        /* =========================================
+           SAM BENNETT PATCH: HUD VISUAL OVERHAUL 
+           ========================================= */
+        
+        /* 1. THE MAIN CONTAINER (Prevents cutoff) */
+        .hud-overlay {
+            position: absolute; top: 80px; right: 60px; 
+            width: 400px; 
+            background: #1a1a1a; 
+            border: 1px solid var(--color-white-muted);
+            border-radius: 20px; 
+            /* REDUCED PADDING: Saves space so 3rd box isn't cut off */
+            padding: 20px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            z-index: 100; display: none; opacity: 0;
+            transform: translateY(-20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hud-overlay.active { display: block; opacity: 1; transform: translateY(0); }
+        
+        .hud-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .hud-title { color: #fff; font-family: var(--font-body); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        .hud-name { color: #fff; font-family: var(--font-display); font-size: 14px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
+        
+        .hud-grid-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px; }
+
+        /* 2. THE BOXES (Force Vertical Stacking) */
+        .hud-box {
+            background: rgba(255,255,255,0.05); 
+            border-radius: 15px; 
+            padding: 15px 10px; 
+            /* THIS IS KEY: Stacks items Top-to-Bottom */
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            aspect-ratio: 1/1; 
+            position: relative;
+        }
+
+        /* 3. BARBELL ICON (Standardized Size & Rotation) */
+        .box-icon.fixed-barbell {
+            display: block; 
+            transform: rotate(-45deg) !important; /* Forces it flat */
+            font-size: 32px !important; /* MATCHING SIZE */
+            margin-bottom: 5px; 
+            color: #00ff9d;
+        }
+
+        /* 4. FIRE ICON (Matched Size & Spacing) */
+        .fire-icon { 
+            font-size: 32px !important; /* Matched to barbell */
+            margin-bottom: 5px; 
+            color: #ff3d3d; 
+            filter: drop-shadow(0 0 10px rgba(255, 61, 61, 0.4)); 
+            display: block;
+        }
+
+        /* 5. THE NUMBER (Centered) */
+        .box-val { 
+            font-family: var(--font-display);
+            font-size: 28px;
+            color: #fff;
+            line-height: 1;
+            margin: 0; 
+        }
+
+        /* 6. THE LABEL (Sessions/Streak - Always at bottom) */
+        .box-label { 
+            font-size: 9px; 
+            color: rgba(255,255,255,0.5); 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            margin-top: 5px; 
+        }
+
+        /* 7. THE CALENDAR (Back to Grid, but tighter) */
+        .week-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); /* 3 Columns */
+            gap: 4px; /* Tight gap */
+            width: 100%; 
+            justify-items: center;
+            align-content: center;
+        }
+
+        .day-bubble { 
+            width: 20px; height: 20px; 
+            border-radius: 50%; 
+            background: #222; color: #666; 
+            font-size: 8px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.3s; border: 1px solid transparent;
+        }
+
+        /* STATUS COLORS */
+        .day-bubble.b-cyan { /* WORKOUT DONE */
+            background: var(--color-accent-blue); color: #000; 
+            box-shadow: 0 0 8px var(--color-accent-blue); 
+        }
+        .day-bubble.b-pink { /* GRACE - NEON MODE */
+            border: 1px solid var(--color-grace); 
+            color: #fff; 
+            background: rgba(214, 51, 132, 0.6); 
+            box-shadow: 0 0 10px var(--color-grace), 0 0 20px var(--color-grace); 
+            text-shadow: 0 0 5px #fff;
+            z-index: 10; 
+        }
+        .day-bubble.b-yellow { /* REST (Safe) */
+            border-color: var(--color-gold); color: var(--color-gold);
+            background: rgba(255, 215, 0, 0.1);
+        }
+        .day-bubble.b-red { /* MISSED (Buffer Broken) */
+            background: rgba(255, 61, 61, 0.2); color: #ff3d3d;
+            border: 1px solid #ff3d3d;
+        }
+        .day-bubble.future { opacity: 0.3; border: 1px solid #444; }
+        .day-bubble.active { background: var(--color-accent-blue); color: #000; box-shadow: 0 0 5px var(--color-accent-blue); }
+        .day-bubble.pulse { border: 1px solid var(--color-white); color: #fff; animation: pulseDay 1.5s infinite; }
+        
+        @keyframes pulseDay { 0% { opacity: 0.5; } 50% { opacity: 1; box-shadow: 0 0 8px #fff; } 100% { opacity: 0.5; } }
+
+        .hud-section-title { font-size: 10px; color: #fff; font-style: italic; margin-bottom: 5px; }
+        .hud-bar-track { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
+        .hud-bar-fill { height: 100%; background: #fff; width: 0%; border-radius: 3px; }
+        .hud-pct { text-align: right; font-size: 10px; color: #fff; font-weight: 700; }
+
+        .hud-weight-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin: 20px 0;
+        }
+        .hw-left { display: flex; gap: 10px; align-items: center; }
+        .hw-icon { color: var(--color-accent-blue); font-size: 20px !important; }
+        .hw-text { display: flex; flex-direction: column; }
+        .hw-label { font-size: 10px; color: #888; }
+        .hw-main { font-size: 12px; color: #fff; font-weight: 700; }
+        
+        .hw-right { text-align: right; }
+        .hw-big { font-family: var(--font-display); font-size: 20px; color: #fff; }
+        .hw-sub { font-size: 12px; color: #888; }
+
+        /* Weekly Stats Container */
+        .weekly-stats { 
+            display: flex; flex-direction: column; gap: 8px; margin-bottom: 25px; 
+        }
+
+        /* The Row (Text is now White) */
+        .ws-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            font-size: 11px; 
+            color: #ffffff; /* PLAIN WHITE TEXT */
+        }
+
+        /* The Icon (Gold & Fixed) */
+        .ws-icon { 
+            font-size: 16px !important; 
+            color: #FFD700; /* GOLD */
+            width: 24px; 
+            text-align: center; 
+            margin-right: 10px;
+            text-transform: lowercase !important; 
+            font-feature-settings: 'liga'; 
+            vertical-align: middle;
+        }
+
+        /* The Value (Number on the right) */
+        .ws-val { color: #fff; font-weight: 700; }
+
+        .hud-actions { display: flex; flex-direction: column; gap: 10px; }
+        
+        /* Updated Button Style */
+        .hud-btn { 
+            background: rgba(0, 229, 255, 0.05); 
+            border: 1px solid rgba(0, 229, 255, 0.3); 
+            color: #fff; 
+            padding: 15px 5px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 9px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 6px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            text-decoration: none;
+            white-space: nowrap; 
+        }
+        .hud-btn:hover { 
+            background: var(--color-accent-blue); 
+            color: #000; 
+            box-shadow: 0 0 15px var(--color-accent-blue); 
+            transform: translateY(-2px);
+        }
+        .hud-btn span { font-size: 14px !important; margin: 0; }
+
+        /* --- LEVEL & PRESTIGE BLOCK (The Upgrade) --- */
+        .hud-level-block { margin: 25px 0; }
+        
+        .hud-level-header { 
+            display: flex; justify-content: space-between; align-items: flex-end; 
+            margin-bottom: 8px; 
+        }
+        
+        .hud-lvl-text { 
+            font-family: var(--font-display); font-size: 24px; color: #fff; 
+            text-transform: uppercase; letter-spacing: 1px; line-height: 1; 
+        }
+        .hud-lvl-text span { color: var(--color-accent-blue); font-size: 32px; margin-left: 2px; }
+
+        .hud-prestige-tag { 
+            text-align: right; border-right: 3px solid var(--color-gold); 
+            padding-right: 10px; line-height: 0.9; 
+        }
+        .hud-p-val { color: var(--color-gold); font-family: var(--font-display); font-size: 20px; display: block; letter-spacing: 1px; }
+        .hud-p-lbl { color: rgba(255,255,255,0.4); font-size: 8px; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* The Neon Bar */
+        .hud-neon-track { 
+            width: 100%; height: 10px; /* Thicker */
+            background: rgba(255,255,255,0.05); position: relative; 
+        }
+        .hud-neon-fill { 
+            height: 100%; background: var(--color-accent-blue); 
+            width: 0%; 
+            box-shadow: 0 0 15px var(--color-accent-blue); /* The Glow */
+            transition: width 1s ease;
+        }
+
+        /* --- LINK BEHAVIOR --- */
+        a.hud-link, a.hud-level-link { 
+            text-decoration: none; 
+            color: inherit; 
+            cursor: pointer; 
+            display: block; 
+            transition: all 0.3s ease;
+        }
+        
+	    a.hud-box {
+            display: flex !important;
+        }
+
+        a.hud-link:hover { 
+            background: rgba(255,255,255,0.1); 
+            transform: translateY(-5px); 
+            border-color: var(--color-accent-blue);
+        }
+        
+        a.hud-level-link:hover .hud-lvl-text {
+            text-shadow: 0 0 15px var(--color-accent-blue);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <div class="nav-left">
+            <span class="material-symbols-outlined exit-btn" onclick="window.location.href='LifeHub.html'">logout</span>
+            <div class="brand-text">
+                <span>LIFE</span>
+                <span>HUB</span>
+            </div>
+        </div>
+
+        <div class="nav-center">
+            <img src="https://i.imgur.com/NAWskLX.png" alt="LifeHub Logo" class="logo-img">
+        </div>
+
+        <div class="nav-right">
+            <span class="material-symbols-outlined icon-btn" onclick="toggleHUD()">person</span>
+        </div>
+    </div>
+
+    <div class="hud-overlay" id="profileHud">
+        <div class="hud-header">
+            <div class="hud-title"><span class="material-symbols-outlined" style="font-size:16px">home</span> Overview</div>
+            <div class="hud-name"><span style="color:#d63384; font-size:12px;">♀</span> JEN BENJAMIN</div>
+        </div>
+
+        <div class="hud-grid-row">
+            
+            <a href="fitness-centre-training_deck.html" class="hud-box hud-link">
+                <span class="material-symbols-outlined box-icon fixed-barbell" style="color:#00ff9d;">fitness_center</span>
+                <span class="box-val" id="hudTotalWO">0</span>
+                <span class="box-label">SESSIONS</span>
+            </a>
+            
+            <a href="fitness-centre-calendar.html" class="hud-box hud-link" style="padding:10px;">
+                <div class="week-grid" id="hudWeekGrid"></div>
+            </a>
+
+            <div class="hud-box">
+                <span class="material-symbols-outlined box-icon fire-icon">local_fire_department</span>
+                <span class="box-val" id="hudStreak">0</span>
+                <span class="box-label">BEST STREAK</span>
+            </div>
+
+        </div> 
+        <a href="fitness-centre-progress_tracker.html" class="hud-level-block hud-level-link">
+            <div class="hud-level-header">
+                <div class="hud-lvl-text">LEVEL <span id="hudLvlNum">1</span></div>
+                <div class="hud-prestige-tag">
+                    <span class="hud-p-val" id="hudTotalPrestige">0</span>
+                    <span class="hud-p-lbl">PRESTIGE</span>
+                </div>
+            </div>
+            <div class="hud-neon-track">
+                <div class="hud-neon-fill" id="hudLvlBar"></div>
+            </div>
+        </a>
+
+        <div class="hud-weight-row">
+            <div class="hw-left">
+                <span class="material-symbols-outlined hw-icon">monitor_weight</span>
+                <div class="hw-text">
+                    <span class="hw-label">Current Stats</span>
+                    <span class="hw-main">Weight & BMI</span>
+                </div>
+            </div>
+            <div class="hw-right">
+                <div class="hw-big" id="hudWeight">-- <span style="font-size:10px">kg</span></div>
+                <div class="hw-sub" id="hudBMI">--</div>
+            </div>
+        </div>
+
+        <div style="font-size:10px; color:#FFD700; margin-bottom:10px; letter-spacing:1px; text-transform:uppercase;">Weekly Performance</div>
+        <div class="weekly-stats">
+            <div class="ws-row">
+                <div style="display:flex; align-items:center;"><span class="material-symbols-outlined ws-icon">fitness_center</span> Exercises Completed</div>
+                <span class="ws-val" id="hudWkEx">0</span>
+            </div>
+            <div class="ws-row">
+                <div style="display:flex; align-items:center;"><span class="material-symbols-outlined ws-icon">stars</span> Prestige Earned</div>
+                <span class="ws-val" id="hudWkPres">0</span>
+            </div>
+            <div class="ws-row">
+                <div style="display:flex; align-items:center;"><span class="material-symbols-outlined ws-icon">schedule</span> Productivity Time</div>
+                <span class="ws-val" id="hudWkTime">0h 0m</span>
+            </div>
+        </div>
+
+        <div class="hud-actions">
+            <a href="fitness-centre-measurement.html" class="hud-btn">
+                <span class="material-symbols-outlined">straighten</span> MEASUREMENTS
+            </a>
+            <a href="fitness-centre-gallery.html" class="hud-btn">
+                <span class="material-symbols-outlined">photo_library</span> Progress View
+            </a>
+            <a href="fitness-centre-gallery.html" class="hud-btn">
+                <span class="material-symbols-outlined">add_a_photo</span> Upload a Photo
+            </a>
+        </div>
+    </div>
+
+    <div class="center-stage">
+        <div class="quote-upper fade-text" id="topQuote">"Gamifying Survival"</div>
+        
+        <h1 class="main-title">Fitness Centre</h1>
+        
+        <div class="btn-container">
+            <button class="action-btn btn-start" onclick="window.location.href='fitness-centre-active_session.html'">Initialize Workout</button>
+            <button class="action-btn btn-dashboard" onclick="window.location.href='fitness-centre-history_log.html'">DASHBOARD</button>
+        </div>
+    </div>
+
+    <div class="right-dock">
+        <a href="fitness-centre-training_deck.html" class="dock-item">
+             <span class="material-symbols-outlined dock-icon">fitness_center</span>
+            <span class="dock-label">TRAINING</span>
+        </a>
+
+        <a href="fitness-centre-calendar.html" class="dock-item">
+            <span class="material-symbols-outlined dock-icon">calendar_month</span>
+            <span class="dock-label">CALENDAR</span>
+        </a>
+
+        <a href="fitness-centre-progress_tracker.html" class="dock-item">
+            <span class="material-symbols-outlined dock-icon">equalizer</span>
+            <span class="dock-label">LEVELS</span>
+        </a>
+
+        <a href="fitness-centre-measurement.html" class="dock-item">
+            <span class="material-symbols-outlined dock-icon">straighten</span>
+            <span class="dock-label">STATS</span>
+        </a>
+        
+        <a href="fitness-centre-gallery.html" class="dock-item">
+            <span class="material-symbols-outlined dock-icon">photo_library</span>
+            <span class="dock-label">GALLERY</span>
+        </a>
+    </div>
+
+    <div class="bottom-area">
+        <div class="quote-line"></div>
+        <div class="quote-lower fade-text" id="bottomQuote">"Discipline is choosing what you want most over what you want now."</div>
+    </div>
+
+    <script src="js/core.js"></script>
+
+    <script>
+        const TOP_TIMER = 30000; 
+        const BOTTOM_TIMER = 15000; 
+        
+        const topQuotesList = [
+            "You mirror, not magnetized.",
+            "You can be whoever you aim to be.",
+            "Let Results Speak",
+            "Architecture: Body",
+            "Start it. Do it. Until it becomes an autopilot.",
+            "High standard = High respect",
+            "Being high standard is 90% discipline 10% glam.",
+            "Make people feel uneasy by not knowing your next move.",
+            "Be someone far from their reach.",
+            "Discipline is the highest form of self love.",
+            "Be stronger than your excuse.",
+            "WORK. SWEAT. ACHIEVE.",
+            "You vs. You.",
+            "Consistency. Consistency. Consistency. Consistency.",
+            "Fit is a decision.",
+            "CEO energy.",
+            "Victoria Secret energy.",
+            "The comeback is personal. It's an apology to yourself.",
+            "1% better everyday.",
+            "Train insane or remain the same.",
+            "Become fucking obsessed with the mission!",
+            "Your brain loves rewards. Use that to your advantage.",
+            "Sleep for 7 hours. Not 10 hours. Not 4 hours.",
+            "Train for 1 hour. Not 3.",
+            "Don't forget to update your measurements.",
+            "The only bad workout is the one that didn't happen.",
+            "It never gets easier. You just get better.",
+            "Sore today, strong tomorrow.",
+            "Sweat now, shine later.",
+            "Stronger than yesterday.",
+            "Train like a beast, look like a beauty.",
+            "Earn your shower.",
+            "Defy your limits.",
+            "My warm-up is your workout.",
+            "Sweating like a sinner in church.",
+            "Everything hurts and I'm dying. See you tomorrow.",
+            "I wear black to the gym because it’s a funeral for my fat.",
+            "Sore AF.",
+            "Team Hard Gainer.",
+            "Your future self will thank you.",
+            "Invest in yourself. It pays the best interest.",
+            "Hustle for that muscle.",
+            "Don't wish for it. Work for it.",
+            "Go hard or go home.",
+	    "Action cures anxiety.",
+            "Slow progress is still progress.",
+            "Work on you, for you.",
+            "Under Construction.",
+	    "Work on you. For you.",
+	    "Mode: Sexy AF.",
+            "Leveling Up.",
+            "Don't decrease the goal. Increase the effort.",
+            "Small steps every day add up to big results.",
+            "Your body hears everything your mind says.",
+            "Glowing and growing.",
+            "Hustle for that muscle.",
+            "Peach in progress.",
+            "Good things come to those who sweat.",
+            "It won't be easy, but it'll be worth it.",
+            "The clock is ticking. Are you becoming the person you want to be?",
+            "You didn't come this far to only come this far.",
+            "You're not done yet.",
+            "Every rep is a choice to be better.",
+            "You control this, not the weight.",
+            "You didn't wake up today to be average.",
+            "No, Jen. You're not average.",
+            "Prove yourself wrong about what you can't do.",
+            "Rest is part of the work.",
+            "Sleep builds muscle, not just lifting.",
+            "Take your workout selfie.",
+            "Something is better than nothing.",
+            "Show up even on low-energy days.",
+            "Listen to your body, not your ego.",
+            "Full range of motion beats half reps.",
+            "Rest between sets—your muscles need it.",
+            "Rest days are part of the program, not weakness.",
+            "Listen to your body, not just your playlist.",
+            "Work it, make it, do it.",
+            "Harder, better, faster, stronger.",
+            "Classy, bougie, ratchet. Sassy, moody, nasty.",
+            "You see it, You like it, You want it, You got it..",
+            "Don't stop believin', hold on to that feelin'.",
+            "Started from the bottom, now here you are.",
+            "Can't stop, won't stop.",
+            "Look at you.",
+            "Long story short, you survived.",
+            "Everything you lose is a step you take.",
+            "Ask yourself why so many fade, but you're still here.",
+            "It's never too late to be brand new.",
+            "You'll never find another like you.",
+            "In my reputation era.",
+            "You gotta get up and try, try, try.",
+            "No one can be just like you any way.",
+            "We don't have to be ordinary.",
+            "Complicated? No, just dedicated.",
+            "Shut up and go lift.",
+            "Clear skin. Shiny hair. Fit body. Healthy mind.",
+            "Motherf*cking Princess.",
+            "Trust the process.",
+            "The Best Damn Thing Is Today.",
+            "Upgrade your life in silence.",
+            "Action board.",
+            "Dream body mode.",
+	    "If you're tired. Do it tired.",
+	    "New Era.",
+	    "Shock them.",
+	    "Small steps lead to big impact.",
+	    "Quit here? or Get better?.",
+	    "Focus: Leveling UP.",
+	    "Own lane. Own race. Owan pace.",
+	    "Yes, you can and yes, you will.",
+	    "Outwork them.",
+	    "In my 'I don't know how, but I will' era.",
+	    "Be the woman you look up to.",
+            "Don't wish for it. Work for it.",
+            "Rumour has it they secretly envy you."
+        ];
+
+        const bottomQuotesList = [
+            "The gap between failure and success? It’s not talent. It’s not luck. It’s relentless consistency.",
+	    "Discipline will take you places. Motivation can't.",
+	    "Work until you're on someone's vision board.",
+            "If your mindset is stronger than the rejection, If your persistence outlasts the setbacks, If you never give up — There is nothing you can’t achieve.",
+	    "Discipline is choosing between what you want now and what you want MOST.",
+            "Do it alone. Do it broke. Do it tired. Do it scared. Just do it.",
+            "You can be whoever you aim to be. Stop believing that someone else gets to decide how far you’re destined to go.",
+	    "21/90 RULE. It takes 21 days to create a habit. It takes 90 days to create a lifestyle.",
+            "Your next chapter is going to cause some people to wish they had treated you better. Be prepared.",
+            "It's a slow process, but quitting won't speed it up.",
+            "You spend most of your life inside your head. Make it a nice place to be.",
+            "Discipline is choosing between what you want now and what you want most.",
+            "The strongest are gentle. The smartest are quiet. The wealthiest are simple. The happiest are private.",
+            "Motivation is what gets you started. Habit is what keeps you going.",
+            "It’s not talent. It’s not luck. It’s relentless consistency.",
+            "Discipline is doing what needs to be done, even if you don't want to do it.",
+            "Don’t stop when you’re tired. Stop when you’re done.",
+            "Fall in love with the process, and the results will come.",
+            "Don't decrease the goal. Increase the effort.",
+            "Discipline is choosing between what you want now and what you want most. Choose what you want most.",
+            "You are not defined by the days you fall down, but by the courage it takes to stand back up and grab the weights again.",
+            "The greatest project you will ever work on is you, so take your time and enjoy the process of construction.",
+            "Be the person who decided to go for it when everyone else decided to sleep in.",
+            "Ten percent luck, twenty percent skill, fifteen percent concentrated power of will.",
+            "Ain't about how fast I get there. Ain't about what's waiting on the other side. It's the climb.",
+            "I could build a castle out of all the bricks they threw at me.",
+            "Where there is desire, there is gonna be a flame. Where there is a flame, someone's bound to get burned.",
+            "Just like fire, burning out the way. If I can light the world up for just one day.",
+            "Pretty, pretty please, don't you ever, ever feel, like you're less than f*ckin' perfect.",
+            "Confidence grows with action and shrinks with inaction.",
+            "Make people feel uneasy by not knowing your next move.",
+            "We all grow at different rates and that’s okay!."
+        ];
+
+        const topEl = document.getElementById('topQuote');
+        const bottomEl = document.getElementById('bottomQuote');
+        let topInterval, bottomInterval;
+
+        function getRandom(list, currentText) {
+            let newItem;
+            do { newItem = list[Math.floor(Math.random() * list.length)]; } 
+            while (newItem === currentText && list.length > 1);
+            return newItem;
+        }
+
+        function cycleText(element, list) {
+            element.classList.add('hidden');
+            setTimeout(() => {
+                const newText = getRandom(list, element.innerText.replace(/"/g, ''));
+                element.innerText = `"${newText}"`;
+                element.classList.remove('hidden');
+            }, 800); 
+        }
+
+        function startTopTimer() { topInterval = setInterval(() => cycleText(topEl, topQuotesList), TOP_TIMER); }
+        function startBottomTimer() { bottomInterval = setInterval(() => cycleText(bottomEl, bottomQuotesList), BOTTOM_TIMER); }
+
+        topEl.addEventListener('mouseenter', () => { clearInterval(topInterval); topEl.style.opacity = "1"; });
+        topEl.addEventListener('mouseleave', () => { startTopTimer(); });
+        bottomEl.addEventListener('mouseenter', () => { clearInterval(bottomInterval); bottomEl.style.opacity = "1"; });
+        bottomEl.addEventListener('mouseleave', () => { startBottomTimer(); });
+
+        window.onload = () => {
+            // Randomize text immediately on load
+            topEl.innerText = `"${getRandom(topQuotesList, '')}"`;
+            bottomEl.innerText = `"${getRandom(bottomQuotesList, '')}"`;
+
+            // Then start the timers for the next cycle
+            startTopTimer();
+            startBottomTimer();
+            checkMissionStatus();
+        };
+
+        function checkMissionStatus() {
+            const btn = document.querySelector('.btn-start');
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const templates = JSON.parse(localStorage.getItem('lh_templates')) || [];
+            const todaysMission = templates.find(t => t.date === todayStr && !t.isCompleted);
+
+            if (todaysMission) {
+                btn.classList.add('mission-ready');
+                btn.innerText = "INITIALIZE WORKOUT"; 
+            } else {
+                btn.classList.remove('mission-ready');
+                btn.innerText = "INITIALIZE WORKOUT"; 
+            }
+        }
+
+        /* --- HUD LOGIC --- */
+        function toggleHUD() {
+            const hud = document.getElementById('profileHud');
+            if (hud.style.display === 'block') {
+                hud.style.opacity = '0';
+                hud.style.transform = 'translateY(-20px)';
+                setTimeout(() => hud.style.display = 'none', 300);
+            } else {
+                refreshHUDData();
+                hud.style.display = 'block';
+                setTimeout(() => {
+                    hud.style.opacity = '1';
+                    hud.style.transform = 'translateY(0)';
+                }, 10);
+            }
+        }
+
+        function refreshHUDData() {
+            if (typeof UserProfile === 'undefined') { console.log("Core missing for HUD"); return; }
+            
+            // 1. Load Databases
+            const templates = JSON.parse(localStorage.getItem('lh_templates')) || [];
+            const logs = UserProfile.systemLogs || [];
+            const historyLogs = JSON.parse(localStorage.getItem('LifeHub_Measurements')) || [];
+            const now = new Date();
+            
+            // A. Total Workouts
+            const totalDone = templates.filter(t => t.isCompleted).length;
+            document.getElementById('hudTotalWO').innerText = totalDone;
+
+            // B. Streak
+            document.getElementById('hudStreak').innerText = UserProfile.streak || 0;
+
+            // C. Fitness Level & Prestige
+            const fitStat = getLevelStatus(UserProfile.fitnessPoints, FITNESS_LEVELS, true);
+            
+            // Update Level Number
+            document.getElementById('hudLvlNum').innerText = fitStat.level;
+            
+            // Update The Neon Bar width
+            document.getElementById('hudLvlBar').style.width = fitStat.pct + "%";
+            
+            // Update Total Prestige (New Slot)
+            document.getElementById('hudTotalPrestige').innerText = UserProfile.prestigeCurrency.toLocaleString();
+
+            // D. Weight & BMI
+            if (historyLogs.length > 0) {
+                const lastLog = historyLogs[historyLogs.length - 1];
+                const w = lastLog.data.Weight || 0;
+                document.getElementById('hudWeight').innerHTML = w + ' <span style="font-size:10px">kg</span>';
+                if(w > 0) {
+                    const bmi = (w / ((1.6) ** 2)).toFixed(1);
+                    document.getElementById('hudBMI').innerText = bmi;
+                }
+            }
+
+            // E. Weekly Monitor & Stats
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(now.getDate() - 7);
+            
+            const recentTemplates = templates.filter(t => t.isCompleted && new Date(t.date) >= oneWeekAgo);
+            
+            let wkEx = 0;
+            let wkTime = 0;
+            let wkPrestige = 0;
+
+            recentTemplates.forEach(t => {
+                if(t.exercises) wkEx += t.exercises.length;
+                if(t.durationSeconds) wkTime += t.durationSeconds;
+            });
+            
+            logs.filter(l => new Date(l.date) >= oneWeekAgo && l.type === 'prestige').forEach(l => {
+                const match = l.text.match(/\[\+(\d+)/);
+                if(match) wkPrestige += parseInt(match[1]);
+            });
+
+            document.getElementById('hudWkEx').innerText = wkEx;
+            document.getElementById('hudWkPres').innerText = wkPrestige.toLocaleString();
+            const h = Math.floor(wkTime / 3600);
+            const m = Math.floor((wkTime % 3600) / 60);
+            document.getElementById('hudWkTime').innerText = `${h}h ${m}m`;
+
+            // --- RENDER WEEKLY BUBBLES (ROBUST DATE MATCHING) ---
+            const weekContainer = document.getElementById('hudWeekGrid');
+            weekContainer.innerHTML = '';
+            const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            const currentDayIndex = now.getDay(); // 0=Sun, 1=Mon...
+
+            // 1. Continuous Logic: Check LAST Saturday
+            // We construct dates manually to avoid timezone shifts
+            const lastSaturday = new Date(now);
+            lastSaturday.setDate(now.getDate() - currentDayIndex - 1);
+            const satStr = `${lastSaturday.getFullYear()}-${String(lastSaturday.getMonth()+1).padStart(2,'0')}-${String(lastSaturday.getDate()).padStart(2,'0')}`;
+            
+            const satDone = templates.some(t => t.date === satStr && t.isCompleted);
+            const satGrace = logs.some(l => {
+                const ld = new Date(l.date);
+                const ldStr = `${ld.getFullYear()}-${String(ld.getMonth()+1).padStart(2,'0')}-${String(ld.getDate()).padStart(2,'0')}`;
+                return ldStr === satStr && l.type === 'grace';
+            });
+            
+            let daysSinceLastActivity = (satDone || satGrace) ? 0 : 1;
+
+            // 2. Loop through THIS week
+            for(let i=0; i<7; i++) { 
+                // Calculate bubble date relative to start of week
+                const startOfWeek = new Date(now);
+                startOfWeek.setDate(now.getDate() - currentDayIndex); 
+                
+                const bubbleDate = new Date(startOfWeek);
+                bubbleDate.setDate(startOfWeek.getDate() + i);
+                
+                // FORCE LOCAL STRING (YYYY-MM-DD)
+                const bYear = bubbleDate.getFullYear();
+                const bMonth = String(bubbleDate.getMonth() + 1).padStart(2, '0');
+                const bDay = String(bubbleDate.getDate()).padStart(2, '0');
+                const bubbleLocalStr = `${bYear}-${bMonth}-${bDay}`;
+
+                // Check Statuses
+                // Future Check (Time stripped)
+                const isFuture = bubbleDate.setHours(0,0,0,0) > now.setHours(0,0,0,0);
+                
+                // Template Check (Already local YYYY-MM-DD)
+                const isDone = templates.some(t => t.date === bubbleLocalStr && t.isCompleted);
+                
+                // Grace Check (Convert Log ISO to Local YYYY-MM-DD before comparing)
+                const isGrace = logs.some(l => {
+                    const ld = new Date(l.date);
+                    const ldStr = `${ld.getFullYear()}-${String(ld.getMonth()+1).padStart(2,'0')}-${String(ld.getDate()).padStart(2,'0')}`;
+                    return ldStr === bubbleLocalStr && l.type === 'grace';
+                });
+
+                let bubbleClass = '';
+
+                if (isFuture) {
+                    bubbleClass = 'future';
+                } 
+                else if (isDone) {
+                    bubbleClass = 'b-cyan';
+                    daysSinceLastActivity = 0; // Reset buffer
+                } 
+                else if (isGrace) {
+                    bubbleClass = 'b-pink';
+                    daysSinceLastActivity = 0; // Grace protects the buffer
+                } 
+                else {
+                    // MISSED / REST
+                    daysSinceLastActivity++;
+
+                    // If gap is 1 day -> REST (Yellow)
+                    // If gap is >= 2 days -> MISSED (Red)
+                    if (daysSinceLastActivity < 2) {
+                        bubbleClass = 'b-yellow'; // Rest Period
+                    } else {
+                        bubbleClass = 'b-red'; // Buffer Broken
+                    }
+                }
+
+                const bubble = document.createElement('div');
+                bubble.className = `day-bubble ${bubbleClass}`;
+                bubble.innerText = days[i];
+                weekContainer.appendChild(bubble);
+            }
+        }
+    </script>
+
+</body>
+</html>
