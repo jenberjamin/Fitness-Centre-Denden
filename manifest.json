@@ -1,21 +1,22 @@
 {
-  "name": "LifeHub OS",
-  "short_name": "LifeHub",
-  "start_url": "./LifeHub.html",
+  "name": "Fitness Centre | Denden",
+  "short_name": "FitnessHub",
+  "start_url": "./FITNESS-CENTRE.html",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#00e5ff",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "https://i.imgur.com/NAWskLX.png",
+      "src": "https://i.imgur.com/0EU154S.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://i.imgur.com/NAWskLX.png",
+      "src": "https://i.imgur.com/0EU154S.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ]
+
 }
